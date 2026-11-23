@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import NavAuth from "@/components/NavAuth";
 
 export const metadata: Metadata = {
   title: "Rede Social da Trilha",
@@ -22,6 +23,9 @@ export default function RootLayout({
             <Link href="/usuarios" className="text-sm text-zinc-600 hover:text-zinc-900">
               Usuários
             </Link>
+            <div className="ml-auto">
+              <NavAuth />
+            </div>
           </div>
         </nav>
         <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>

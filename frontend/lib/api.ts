@@ -3,9 +3,18 @@
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+export class ApiError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
 function headers(): HeadersInit {
   const h: Record<string, string> = { "Content-Type": "application/json" };
-  // Parte 2 do guia 01: leia o token salvo no login e envie em Authorization.
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  if (token) h["Authorization"] = `Bearer ${token}`;
   return h;
 }
 
@@ -25,10 +34,9 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   }
 
   if (!res.ok) {
-    // 422 = corpo inválido; 409 = conflito (ex.: username repetido). Ver guia 04.
     const erro = await res.json().catch(() => null);
     const detail = typeof erro?.detail === "string" ? erro.detail : null;
-    throw new Error(detail ?? `${method} ${path} → ${res.status}`);
+    throw new ApiError(res.status, detail ?? `${method} ${path} → ${res.status}`);
   }
 
   // 204 No Content (seguir, curtir, apagar...) não tem corpo: não há JSON para ler.

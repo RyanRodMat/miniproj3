@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -18,8 +18,8 @@ class UserOut(BaseModel):
     name: str
     bio: str
     avatar_url: str
+    tipo: Literal["artista", "leitor"]
     created_at: datetime
-
 
 class UserPage(BaseModel):
     """Padrão de paginação do projeto: todo endpoint de listagem devolve isto."""
