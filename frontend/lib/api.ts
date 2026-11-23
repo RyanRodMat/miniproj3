@@ -79,3 +79,7 @@ export type Page<T> = {
   offset: number;
   limit: number;
 };
+
+// ---- Perfil (PATCH /usuarios/eu) ----
+
+export type UserCompleto = User & { tipo: "artista" | "leitor" };

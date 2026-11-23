@@ -50,7 +50,7 @@ tirem linhas quando mudarem de ideia.
 | Auth (núcleo) | Ryan | Sem login ninguém posta, vota nem comenta; é o gargalo de todo o time. |
 | Posts (núcleo) | | |
 | Feed (núcleo) | | |
-| Perfil (núcleo) | | |
+| Perfil (núcleo) | Matheus | O artista precisa de uma vitrine própria; o perfil é onde o leitor conhece quem desenha (com selo de artista). |
 | Follow (núcleo) | | |
 | Curtidas (núcleo) | | |
 | Comentários (núcleo) | | |
