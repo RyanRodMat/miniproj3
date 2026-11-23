@@ -97,3 +97,12 @@ export type Post = {
   autor: Autor;
   created_at: string;
 };
+
+// ---- Perfil e follow (espelham PerfilOut em backend/app/schemas/user.py) ----
+
+export type Perfil = User & {
+  tipo: "artista" | "leitor";
+  seguidores: number;
+  seguindo: number;
+  eu_sigo: boolean;
+};

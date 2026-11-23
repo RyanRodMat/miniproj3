@@ -51,7 +51,7 @@ tirem linhas quando mudarem de ideia.
 | Posts (núcleo) | Matheus | O post é o conteúdo base: o feed mistura texto puro e arte (`imagem_url`), como no Twitter. |
 | Feed (núcleo) | | |
 | Perfil (núcleo) | | |
-| Follow (núcleo) | | |
+| Follow (núcleo) | Matheus | Seguir um artista é como o leitor acompanha as histórias dele; também alimenta o feed dos seguidos. |
 | Curtidas (núcleo) | | |
 | Comentários (núcleo) | | |
 | Seed fake (núcleo) | | |
