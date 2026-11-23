@@ -64,3 +64,29 @@ def test_patch_pode_remover_imagem_e_nao_aceita_texto_nulo(client, logar):
 
     r = client.patch(f"/posts/{post_id}", json={"texto": None}, headers=ana)
     assert r.status_code == 422
+
+
+def test_listagem_recentes_paginada_mais_novo_primeiro(client, logar):
+    ana = logar("ana")
+    bia = logar("bia")
+    for texto, quem in [("um", ana), ("dois", bia), ("tres", ana)]:
+        client.post("/posts", json={"texto": texto}, headers=quem)
+
+    r = client.get("/posts?offset=0&limit=2", headers=ana)
+    assert r.status_code == 200
+    assert r.json()["total"] == 3
+    assert [p["texto"] for p in r.json()["items"]] == ["tres", "dois"]
+
+    r = client.get("/posts?offset=2&limit=2", headers=ana)
+    assert [p["texto"] for p in r.json()["items"]] == ["um"]
+
+    # além do fim: lista vazia, não erro
+    assert client.get("/posts?offset=50", headers=ana).json()["items"] == []
+    assert client.get("/posts").status_code == 401
+
+
+def test_post_apagado_some_da_listagem(client, logar):
+    ana = logar("ana")
+    post_id = client.post("/posts", json={"texto": "x"}, headers=ana).json()["id"]
+    client.delete(f"/posts/{post_id}", headers=ana)
+    assert client.get("/posts", headers=ana).json()["total"] == 0

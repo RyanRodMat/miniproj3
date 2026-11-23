@@ -1,12 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { apiPost, type Post } from "@/lib/api";
 
-export function NovoPost() {
-  const router = useRouter();
+export function NovoPost({ onCriado }: { onCriado: (post: Post) => void }) {
   const [texto, setTexto] = useState("");
   const [imagemUrl, setImagemUrl] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -23,7 +21,7 @@ export function NovoPost() {
       });
       setTexto("");
       setImagemUrl("");
-      router.push(`/posts/${post.id}`);
+      onCriado(post);
     } catch (err) {
       setErro(err instanceof Error ? err.message : "erro ao publicar");
     } finally {

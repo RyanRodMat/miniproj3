@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.post import Post
@@ -45,3 +46,17 @@ def atualizar(db: Session, post: Post, dados: PostUpdate) -> Post:
 def apagar(db: Session, post: Post) -> None:
     db.delete(post)
     db.commit()
+
+
+def listar_recentes(db: Session, offset: int, limit: int) -> tuple[list[Post], int]:
+    """Todos os posts, mais novo primeiro (empate: maior id). Provisório até o Feed."""
+    total = db.scalar(select(func.count()).select_from(Post)) or 0
+    posts = list(
+        db.scalars(
+            select(Post)
+            .order_by(Post.created_at.desc(), Post.id.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+    )
+    return posts, total

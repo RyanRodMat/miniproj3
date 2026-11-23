@@ -36,3 +36,12 @@ class PostOut(BaseModel):
     imagem_url: str | None
     autor: AutorOut
     created_at: datetime
+
+
+class PostPage(BaseModel):
+    """Padrão de paginação do projeto (igual a UserPage)."""
+
+    items: list[PostOut]
+    total: int
+    offset: int
+    limit: int
