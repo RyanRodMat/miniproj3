@@ -51,7 +51,7 @@ tirem linhas quando mudarem de ideia.
 | Posts (núcleo) | | |
 | Feed (núcleo) | | |
 | Perfil (núcleo) | | |
-| Follow (núcleo) | | |
+| Follow (núcleo) | Matheus | Seguir um artista é como o leitor acompanha as histórias dele; também alimenta o feed dos seguidos. |
 | Curtidas (núcleo) | | |
 | Comentários (núcleo) | | |
 | Seed fake (núcleo) | | |
