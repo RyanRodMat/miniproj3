@@ -1,6 +1,6 @@
 # Decisões do time
 
-**Time:** _(nomes e usernames do GitHub)_
+**Time:** Ryan Rodrigues (@RyanRodMat)
 
 Este arquivo acompanha o projeto. Comecem com o que já sabem e atualizem quando
 as decisões mudarem.
@@ -47,7 +47,7 @@ tirem linhas quando mudarem de ideia.
 
 | Feature | Dono | Por quê (1 frase) |
 |---|---|---|
-| Auth (núcleo) | | |
+| Auth (núcleo) | Ryan | Sem login ninguém posta, vota nem comenta; é o gargalo de todo o time. |
 | Posts (núcleo) | | |
 | Feed (núcleo) | | |
 | Perfil (núcleo) | | |
@@ -67,3 +67,5 @@ saída e uma frase dizendo o que os números mostram.
 
 Ferramenta e para quê. Exemplo: "Claude para gerar o seed de 200 posts sobre
 corrida; o resto foi escrito pelo time."
+
+Ryan: Claude para implementar a lógica de login, e criar conta, bem como diferenciar artista e leitor.
