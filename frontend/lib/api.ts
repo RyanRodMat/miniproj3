@@ -80,6 +80,11 @@ export type Page<T> = {
   limit: number;
 };
 
-// ---- Perfil (PATCH /usuarios/eu) ----
+// ---- Perfil e follow (espelham PerfilOut em backend/app/schemas/user.py) ----
 
-export type UserCompleto = User & { tipo: "artista" | "leitor" };
+export type Perfil = User & {
+  tipo: "artista" | "leitor";
+  seguidores: number;
+  seguindo: number;
+  eu_sigo: boolean;
+};

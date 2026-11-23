@@ -51,7 +51,7 @@ tirem linhas quando mudarem de ideia.
 | Posts (núcleo) | | |
 | Feed (núcleo) | | |
 | Perfil (núcleo) | Matheus | O artista precisa de uma vitrine própria; o perfil é onde o leitor conhece quem desenha (com selo de artista). |
-| Follow (núcleo) | | |
+| Follow (núcleo) | Matheus | Seguir um artista é como o leitor acompanha as histórias dele; também alimenta o feed dos seguidos. |
 | Curtidas (núcleo) | | |
 | Comentários (núcleo) | | |
 | Seed fake (núcleo) | | |

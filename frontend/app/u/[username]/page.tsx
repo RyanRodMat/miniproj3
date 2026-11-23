@@ -3,13 +3,14 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { ApiError, apiGet, apiPatch, type User, type UserCompleto } from "@/lib/api";
+import { BotaoSeguir } from "@/components/BotaoSeguir";
+import { ApiError, apiGet, apiPatch, type Perfil, type User } from "@/lib/api";
 import { useExigeLogin } from "@/lib/useExigeLogin";
 
 export default function PerfilPage() {
   useExigeLogin();
   const { username } = useParams<{ username: string }>();
-  const [perfil, setPerfil] = useState<UserCompleto | null>(null);
+  const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [eu, setEu] = useState<User | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -19,7 +20,7 @@ export default function PerfilPage() {
 
   useEffect(() => {
     if (!localStorage.getItem("token")) return;
-    apiGet<UserCompleto>(`/usuarios/${username}`)
+    apiGet<Perfil>(`/usuarios/${username}`)
       .then(setPerfil)
       .catch((e) =>
         setErro(e instanceof ApiError && e.status === 404 ? "usuário não encontrado" : "erro ao carregar o perfil")
@@ -30,7 +31,9 @@ export default function PerfilPage() {
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
     try {
-      setPerfil(await apiPatch<UserCompleto>("/usuarios/eu", { bio, avatar_url: avatarUrl.trim() }));
+      // o PATCH devolve só o usuário, sem contadores: mantém os que já temos
+      const novo = await apiPatch<User>("/usuarios/eu", { bio, avatar_url: avatarUrl.trim() });
+      setPerfil((atual) => (atual ? { ...atual, ...novo } : atual));
       setEditando(false);
       setErro(null);
     } catch (err) {
@@ -67,6 +70,18 @@ export default function PerfilPage() {
           </div>
           <p className="text-zinc-500">@{perfil.username}</p>
           {perfil.bio && <p className="whitespace-pre-wrap">{perfil.bio}</p>}
+          <p className="text-sm">
+            <strong>{perfil.seguidores}</strong> seguidores · <strong>{perfil.seguindo}</strong> seguindo
+          </p>
+          {eu && !ehMeu && (
+            <BotaoSeguir
+              username={perfil.username}
+              seguindoInicial={perfil.eu_sigo}
+              onMudou={(segue) =>
+                setPerfil({ ...perfil, seguidores: perfil.seguidores + (segue ? 1 : -1), eu_sigo: segue })
+              }
+            />
+          )}
           {ehMeu && !editando && (
             <button
               onClick={() => {

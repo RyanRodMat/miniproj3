@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 
 from app.core.contadores import contador_iniciais
 from app.models.user import User
-from app.schemas.user import PerfilUpdate, UserCreate
+from app.schemas.user import PerfilOut, PerfilUpdate, UserCreate, UserOut
+from app.services import follows
 
 
 def listar(db: Session, offset: int, limit: int) -> tuple[list[User], int]:
@@ -31,11 +32,19 @@ def criar(db: Session, dados: UserCreate) -> User:
     return user
 
 
-def buscar_por_username(db: Session, username: str) -> User:
+def perfil(db: Session, viewer: User, username: str) -> PerfilOut:
     user = db.scalar(select(User).where(User.username == username))
     if not user:
         raise HTTPException(status_code=404, detail="usuário não encontrado")
-    return user
+    seguidores, seguindo = follows.contadores(db, user.id)
+    return PerfilOut.model_validate(
+        {
+            **{c: getattr(user, c) for c in UserOut.model_fields},
+            "seguidores": seguidores,
+            "seguindo": seguindo,
+            "eu_sigo": follows.eu_sigo(db, viewer, user.id),
+        }
+    )
 
 
 def atualizar_perfil(db: Session, user: User, dados: PerfilUpdate) -> User:

@@ -21,6 +21,14 @@ class UserOut(BaseModel):
     tipo: Literal["artista", "leitor"]
     created_at: datetime
 
+class PerfilOut(UserOut):
+    """GET /usuarios/{username}: o usuário + contadores de follow."""
+
+    seguidores: int
+    seguindo: int
+    eu_sigo: bool  # o usuário logado já segue este perfil? (botão seguir/deixar de seguir)
+
+
 class PerfilUpdate(BaseModel):
     """PATCH /usuarios/eu: campo ausente = não mexe; "" limpa o campo."""
 
