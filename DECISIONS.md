@@ -1,6 +1,6 @@
 # Decisões do time
 
-**Time:** _(Ryan Rodrigues: @RyanRodMat )_
+**Time:** Ryan Rodrigues (@RyanRodMat)
 
 Este arquivo acompanha o projeto. Comecem com o que já sabem e atualizem quando
 as decisões mudarem.
@@ -68,5 +68,4 @@ saída e uma frase dizendo o que os números mostram.
 Ferramenta e para quê. Exemplo: "Claude para gerar o seed de 200 posts sobre
 corrida; o resto foi escrito pelo time."
 
-Ryan:
-  Claude para implementar a lógica de login, e criar conta, bem como diferenciar artista e leitor.
+Ryan: Claude para implementar a lógica de login, e criar conta, bem como diferenciar artista e leitor.

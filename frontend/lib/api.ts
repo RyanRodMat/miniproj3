@@ -11,24 +11,26 @@ export class ApiError extends Error {
   }
 }
 
-function headers(): HeadersInit {
+function headers(semToken: boolean): HeadersInit {
   const h: Record<string, string> = { "Content-Type": "application/json" };
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  if (token) h["Authorization"] = `Bearer ${token}`;
+  if (token && !semToken) h["Authorization"] = `Bearer ${token}`;
   return h;
 }
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  // login e registro não levam token: um 401 de senha errada não pode apagar a sessão
+  const publica = path === "/auth/login" || path === "/auth/registro";
   const res = await fetch(`${BASE}${path}`, {
     method,
-    headers: headers(),
+    headers: headers(publica),
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",
   });
 
   // 401 com token salvo = token que não vale mais (ex.: o banco foi apagado ou o
   // servidor do deploy reiniciou). Joga o token fora e volta para o login.
-  if (res.status === 401 && typeof window !== "undefined" && localStorage.getItem("token")) {
+  if (res.status === 401 && !publica && typeof window !== "undefined" && localStorage.getItem("token")) {
     localStorage.removeItem("token");
     if (window.location.pathname !== "/login") window.location.href = "/login";
   }

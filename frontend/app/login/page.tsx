@@ -76,7 +76,7 @@ export default function LoginPage() {
 
       <p className="mt-6 text-sm">
         Ainda não tem conta?{" "}
-        <Link href="/registros" className="underline">
+        <Link href="/registro" className="underline">
           Criar conta
         </Link>
       </p>

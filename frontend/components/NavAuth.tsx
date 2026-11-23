@@ -24,7 +24,7 @@ export default function NavAuth() {
       <Link href="/login" className="text-zinc-600 hover:text-zinc-900">
         Entrar
       </Link>
-      <Link href="/registros" className="text-zinc-600 hover:text-zinc-900">
+      <Link href="/registro" className="text-zinc-600 hover:text-zinc-900">
         Criar conta
       </Link>
     </div>
