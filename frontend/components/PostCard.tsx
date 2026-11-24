@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { BotaoCurtir } from "@/components/BotaoCurtir";
 import type { Post } from "@/lib/api";
 
 /** Renderiza texto puro OU texto + arte, conforme `imagem_url`. */
@@ -23,6 +24,7 @@ export function PostCard({ post }: { post: Post }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={post.imagem_url} alt="" className="max-h-[32rem] w-full rounded object-contain" />
       )}
+      <BotaoCurtir postId={post.id} curtidasInicial={post.curtidas} curtiuInicial={post.eu_curti} />
     </article>
   );
 }

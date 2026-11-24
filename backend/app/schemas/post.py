@@ -36,6 +36,8 @@ class PostOut(BaseModel):
     imagem_url: str | None
     autor: AutorOut
     created_at: datetime
+    curtidas: int = 0
+    eu_curti: bool = False
 
 
 class PostPage(BaseModel):
