@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.contadores import contador_iniciais
 from app.models.user import User
-from app.schemas.user import PerfilOut, UserCreate, UserOut
+from app.schemas.user import PerfilOut, PerfilUpdate, UserCreate, UserOut
 from app.services import follows
 
 
@@ -32,10 +32,15 @@ def criar(db: Session, dados: UserCreate) -> User:
     return user
 
 
-def perfil(db: Session, viewer: User, username: str) -> PerfilOut:
+def buscar(db: Session, username: str) -> User:
     user = db.scalar(select(User).where(User.username == username))
     if not user:
         raise HTTPException(status_code=404, detail="usuário não encontrado")
+    return user
+
+
+def perfil(db: Session, viewer: User, username: str) -> PerfilOut:
+    user = buscar(db, username)
     seguidores, seguindo = follows.contadores(db, user.id)
     return PerfilOut.model_validate(
         {
@@ -45,3 +50,14 @@ def perfil(db: Session, viewer: User, username: str) -> PerfilOut:
             "eu_sigo": follows.eu_sigo(db, viewer, user.id),
         }
     )
+
+
+def atualizar_perfil(db: Session, user: User, dados: PerfilUpdate) -> User:
+    for campo in dados.model_fields_set:
+        valor = getattr(dados, campo)
+        if valor is None:
+            raise HTTPException(status_code=422, detail=f"{campo} não pode ser nulo")
+        setattr(user, campo, valor)
+    db.commit()
+    db.refresh(user)
+    return user

@@ -60,3 +60,21 @@ def listar_recentes(db: Session, offset: int, limit: int) -> tuple[list[Post], i
         )
     )
     return posts, total
+
+
+def listar_do_autor(
+    db: Session, autor_id: int, offset: int, limit: int
+) -> tuple[list[Post], int]:
+    """Posts de um usuário (página de perfil), mais novo primeiro (empate: maior id)."""
+    filtro = Post.autor_id == autor_id
+    total = db.scalar(select(func.count()).select_from(Post).where(filtro)) or 0
+    posts = list(
+        db.scalars(
+            select(Post)
+            .where(filtro)
+            .order_by(Post.created_at.desc(), Post.id.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+    )
+    return posts, total

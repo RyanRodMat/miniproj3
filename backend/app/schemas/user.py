@@ -29,6 +29,14 @@ class PerfilOut(UserOut):
     eu_sigo: bool  # o usuário logado já segue este perfil? (botão seguir/deixar de seguir)
 
 
+class PerfilUpdate(BaseModel):
+    """PATCH /usuarios/eu: campo ausente = não mexe; "" limpa o campo."""
+
+    bio: str | None = Field(default=None, max_length=280)
+    # só http(s) ou caminho do backend; bloqueia javascript:
+    avatar_url: str | None = Field(default=None, max_length=300, pattern=r"^(|(https?://|/)\S+)$")
+
+
 class UserPage(BaseModel):
     """Padrão de paginação do projeto: todo endpoint de listagem devolve isto."""
 
