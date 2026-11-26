@@ -13,6 +13,7 @@ from app.deps import get_current_user
 from app.models.user import User
 from app.schemas.post import PostPage
 from app.schemas.user import PerfilOut, PerfilUpdate, UserCreate, UserOut, UserPage
+from app.services import follows as service_follows
 from app.services import posts as service_posts
 from app.services import users as service
 
@@ -48,6 +49,13 @@ def editar_meu_perfil(
     db: Session = Depends(get_db),
 ):
     return service.atualizar_perfil(db, user, dados)
+
+
+# Antes de "/{username}", senão "eu" seria lido como username.
+@router.get("/eu/seguindo")
+def meus_seguidos(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Usernames que o usuário logado segue (a lista de usuários usa para o botão seguir)."""
+    return {"usernames": service_follows.usernames_seguidos(db, user)}
 
 
 # Declarada depois de /stats: "/{username}" casaria com "stats" se viesse antes.

@@ -6,6 +6,7 @@ from app.deps import get_current_user
 from app.models.user import User
 from app.schemas.post import PostCreate, PostOut, PostPage, PostUpdate
 from app.services import posts as service
+from app.services import follows as service_follows
 from app.services import likes as service_likes
 
 router = APIRouter(prefix="/posts", tags=["posts"])
@@ -17,6 +18,7 @@ def _com_curtidas(db: Session, user: User, post) -> PostOut:
         update={
             "curtidas": service_likes.contador(db, post.id),
             "eu_curti": service_likes.eu_curto(db, user, post.id),
+            "autor_eu_sigo": service_follows.eu_sigo(db, user, post.autor_id),
         }
     )
 

@@ -52,3 +52,13 @@ def contadores(db: Session, user_id: int) -> tuple[int, int]:
 
 def eu_sigo(db: Session, user: User, alvo_id: int) -> bool:
     return _segue(db, user.id, alvo_id)
+
+
+def usernames_seguidos(db: Session, user: User) -> list[str]:
+    return list(
+        db.scalars(
+            select(User.username)
+            .join(Follow, Follow.followed_id == User.id)
+            .where(Follow.follower_id == user.id)
+        )
+    )

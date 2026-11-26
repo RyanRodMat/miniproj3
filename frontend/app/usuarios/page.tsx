@@ -13,6 +13,9 @@ import { apiGet, apiPost, type Page, type User } from "@/lib/api";
 export default function UsuariosPage() {
   const [pagina, setPagina] = useState<Page<User> | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [euId, setEuId] = useState<number>();
+  // null até carregar: o botão só aparece com o estado certo (ele guarda o valor inicial)
+  const [seguindo, setSeguindo] = useState<Set<string> | null>(null);
 
   // form controlado
   const [username, setUsername] = useState("");
@@ -25,13 +28,22 @@ export default function UsuariosPage() {
       setErro(null);
     } catch {
       setErro(
-        "não consegui falar com o backend — ele está rodando? (make dev-back; ver guia 04)"
+        "não consegui falar com o backend — ele está rodando? (make dev-back; ver guia 04)",
       );
     }
   }, []);
 
   useEffect(() => {
     carregar();
+    // só com login: quem eu sou e quem eu já sigo (para o botão seguir)
+    if (localStorage.getItem("token")) {
+      apiGet<User>("/auth/eu")
+        .then((u) => setEuId(u.id))
+        .catch(() => {});
+      apiGet<{ usernames: string[] }>("/usuarios/eu/seguindo")
+        .then((r) => setSeguindo(new Set(r.usernames)))
+        .catch(() => {});
+    }
   }, [carregar]);
 
   async function criar(e: React.FormEvent) {
@@ -53,7 +65,10 @@ export default function UsuariosPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Usuários</h1>
 
-      <form onSubmit={criar} className="flex flex-wrap items-end gap-2 rounded-lg border bg-white p-3">
+      <form
+        onSubmit={criar}
+        className="flex flex-wrap items-end gap-2 rounded-lg border bg-white p-3"
+      >
         <label className="flex flex-col text-sm">
           username
           <input
@@ -84,14 +99,25 @@ export default function UsuariosPage() {
         </button>
       </form>
 
-      {erro && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{erro}</p>}
+      {erro && (
+        <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {erro}
+        </p>
+      )}
 
       {pagina && (
         <>
           <ul className="space-y-2">
             {pagina.items.map((u) => (
               <li key={u.id}>
-                <UserCard user={u} />
+                <UserCard
+                  user={u}
+                  seguir={
+                    euId !== undefined && seguindo && euId !== u.id
+                      ? { seguindo: seguindo.has(u.username) }
+                      : undefined
+                  }
+                />
               </li>
             ))}
           </ul>
