@@ -48,7 +48,7 @@ tirem linhas quando mudarem de ideia.
 | Feature | Dono | Por quê (1 frase) |
 |---|---|---|
 | Auth (núcleo) | Ryan | Sem login ninguém posta, vota nem comenta; é o gargalo de todo o time. |
-| Posts (núcleo) | | |
+| Posts (núcleo) | Matheus | O post é o conteúdo base: o feed mistura texto puro e arte (`imagem_url`), como no Twitter. |
 | Feed (núcleo) | | |
 | Perfil (núcleo) | Matheus | O artista precisa de uma vitrine própria; o perfil é onde o leitor conhece quem desenha (com selo de artista). |
 | Follow (núcleo) | Matheus | Seguir um artista é como o leitor acompanha as histórias dele; também alimenta o feed dos seguidos. |
@@ -69,3 +69,4 @@ Ferramenta e para quê. Exemplo: "Claude para gerar o seed de 200 posts sobre
 corrida; o resto foi escrito pelo time."
 
 Ryan: Claude para implementar a lógica de login, e criar conta, bem como diferenciar artista e leitor.
+Matheus: Claude para implementar Posts, Seguir e Perfil (backend, testes e telas); revisão e decisões do time.

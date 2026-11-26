@@ -80,6 +80,24 @@ export type Page<T> = {
   limit: number;
 };
 
+// ---- Posts (espelham backend/app/schemas/post.py) ----
+
+export type Autor = {
+  id: number;
+  username: string;
+  name: string;
+  avatar_url: string;
+  tipo: "artista" | "leitor";
+};
+
+export type Post = {
+  id: number;
+  texto: string;
+  imagem_url: string | null;
+  autor: Autor;
+  created_at: string;
+};
+
 // ---- Perfil e follow (espelham PerfilOut em backend/app/schemas/user.py) ----
 
 export type Perfil = User & {
