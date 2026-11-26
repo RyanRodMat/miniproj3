@@ -1,7 +1,8 @@
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
+from app.models.like import Like
 from app.models.post import Post
 from app.models.user import User
 from app.schemas.post import PostCreate, PostUpdate
@@ -44,6 +45,7 @@ def atualizar(db: Session, post: Post, dados: PostUpdate) -> Post:
 
 
 def apagar(db: Session, post: Post) -> None:
+    db.execute(delete(Like).where(Like.liked_post_id == post.id))
     db.delete(post)
     db.commit()
 

@@ -49,10 +49,10 @@ tirem linhas quando mudarem de ideia.
 |---|---|---|
 | Auth (núcleo) | Ryan | Sem login ninguém posta, vota nem comenta; é o gargalo de todo o time. |
 | Posts (núcleo) | Matheus | O post é o conteúdo base: o feed mistura texto puro e arte (`imagem_url`), como no Twitter. |
-| Feed (núcleo) | | |
+| Feed (núcleo) | Laura | A prioridade no Feed sempre é de quem o usuário segue, mas também é intercalado conteúdo novo. |
 | Perfil (núcleo) | Matheus | O artista precisa de uma vitrine própria; o perfil é onde o leitor conhece quem desenha (com selo de artista). |
 | Follow (núcleo) | Matheus | Seguir um artista é como o leitor acompanha as histórias dele; também alimenta o feed dos seguidos. |
-| Curtidas (núcleo) | | |
+| Curtidas (núcleo) | Laura | Curtir um post mostra o conteúdo - posts e artistas - que os usuários gostam de ver, ajudando a balancear o feed. |
 | Comentários (núcleo) | | |
 | Seed fake (núcleo) | | |
 
@@ -70,3 +70,4 @@ corrida; o resto foi escrito pelo time."
 
 Ryan: Claude para implementar a lógica de login, e criar conta, bem como diferenciar artista e leitor.
 Matheus: Claude para implementar Posts, Seguir e Perfil (backend, testes e telas); revisão e decisões do time.
+Laura: Claude para ajudar a implementar Curtidas e Feed e para corrigir revisões de código.
