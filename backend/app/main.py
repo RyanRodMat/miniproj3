@@ -7,7 +7,8 @@ from sqlalchemy import select
 from app.core.contadores import contador_iniciais
 from app.db import Base, SessionLocal, engine
 from app.models.user import User
-from app.routers import auth, feed, follows, likes, posts, users
+from app.services.decisoes import reconstruir_jornada
+from app.routers import auth, decisoes, feed, follows, historias, likes, posts, users
 
 
 @asynccontextmanager
@@ -18,6 +19,8 @@ async def lifespan(app: FastAPI):
     with SessionLocal() as db:
         usernames = list(db.scalars(select(User.username)))
     contador_iniciais.reconstruir(usernames)
+    with SessionLocal() as db:
+        reconstruir_jornada(db)
     yield
 
 
@@ -38,3 +41,5 @@ app.include_router(posts.router)
 app.include_router(follows.router)
 app.include_router(likes.router)
 app.include_router(feed.router)
+app.include_router(historias.router)
+app.include_router(decisoes.router)
