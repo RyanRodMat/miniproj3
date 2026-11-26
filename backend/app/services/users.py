@@ -32,10 +32,15 @@ def criar(db: Session, dados: UserCreate) -> User:
     return user
 
 
-def perfil(db: Session, viewer: User, username: str) -> PerfilOut:
+def buscar(db: Session, username: str) -> User:
     user = db.scalar(select(User).where(User.username == username))
     if not user:
         raise HTTPException(status_code=404, detail="usuário não encontrado")
+    return user
+
+
+def perfil(db: Session, viewer: User, username: str) -> PerfilOut:
+    user = buscar(db, username)
     seguidores, seguindo = follows.contadores(db, user.id)
     return PerfilOut.model_validate(
         {

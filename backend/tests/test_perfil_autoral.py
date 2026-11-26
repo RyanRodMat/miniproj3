@@ -1,5 +1,4 @@
-"""Perfil: o que dá para testar sem Posts/Follow. (O teste do núcleo,
-test_perfil_editavel, continua skipped: ele lista os posts do usuário.)"""
+"""Casos de borda do Perfil que o CONTRATO.md não especifica (guia 09)."""
 
 
 def test_editar_e_ler_perfil(client, logar):
@@ -67,3 +66,32 @@ def test_patch_valida_limites_e_nao_deixa_trocar_tipo_ou_username(client, logar)
 def test_stats_continua_acessivel(client):
     # /usuarios/stats não pode ser engolida por /usuarios/{username}
     assert client.get("/usuarios/stats").status_code == 200
+
+
+def test_posts_do_perfil_so_do_dono_mais_novo_primeiro_e_paginado(client, logar):
+    ana = logar("ana")
+    bia = logar("bia")
+    for texto, quem in [("ana 1", ana), ("bia 1", bia), ("ana 2", ana), ("ana 3", ana)]:
+        client.post("/posts", json={"texto": texto}, headers=quem)
+
+    # quem olha é a bia: o perfil mostra só os posts da ana
+    r = client.get("/usuarios/ana/posts?offset=0&limit=2", headers=bia)
+    assert r.status_code == 200
+    corpo = r.json()
+    assert corpo["total"] == 3
+    assert [p["texto"] for p in corpo["items"]] == ["ana 3", "ana 2"]
+    assert all(p["autor"]["username"] == "ana" for p in corpo["items"])
+
+    # "carregar mais"
+    r = client.get("/usuarios/ana/posts?offset=2&limit=2", headers=bia)
+    assert [p["texto"] for p in r.json()["items"]] == ["ana 1"]
+
+
+def test_posts_do_perfil_vazio_404_e_login(client, logar):
+    ana = logar("ana")
+    r = client.get("/usuarios/ana/posts", headers=ana)
+    assert r.json() == {"items": [], "total": 0, "offset": 0, "limit": 20}
+
+    assert client.get("/usuarios/fantasma/posts", headers=ana).status_code == 404
+    assert client.get("/usuarios/ana/posts").status_code == 401
+    assert client.get("/usuarios/ana/posts?limit=101", headers=ana).status_code == 422

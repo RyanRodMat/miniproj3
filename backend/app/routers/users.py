@@ -11,7 +11,9 @@ from app.core.contadores import contador_iniciais
 from app.db import get_db
 from app.deps import get_current_user
 from app.models.user import User
+from app.schemas.post import PostPage
 from app.schemas.user import PerfilOut, PerfilUpdate, UserCreate, UserOut, UserPage
+from app.services import posts as service_posts
 from app.services import users as service
 
 router = APIRouter(prefix="/usuarios", tags=["usuarios"])
@@ -56,3 +58,17 @@ def ver_perfil(
     db: Session = Depends(get_db),
 ):
     return service.perfil(db, user, username)
+
+
+@router.get("/{username}/posts", response_model=PostPage)
+def posts_do_usuario(
+    username: str,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
+    _: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Posts do perfil, mais novo primeiro, paginados como todas as listagens."""
+    autor = service.buscar(db, username)
+    posts, total = service_posts.listar_do_autor(db, autor.id, offset, limit)
+    return PostPage(items=posts, total=total, offset=offset, limit=limit)

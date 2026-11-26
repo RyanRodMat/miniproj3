@@ -1,11 +1,14 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { BotaoSeguir } from "@/components/BotaoSeguir";
-import { ApiError, apiGet, apiPatch, type Perfil, type User } from "@/lib/api";
+import { PostCard } from "@/components/PostCard";
+import { ApiError, apiGet, apiPatch, type Page, type Perfil, type Post, type User } from "@/lib/api";
 import { useExigeLogin } from "@/lib/useExigeLogin";
+
+const POR_PAGINA = 10;
 
 export default function PerfilPage() {
   useExigeLogin();
@@ -18,6 +21,28 @@ export default function PerfilPage() {
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
 
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const [carregandoPosts, setCarregandoPosts] = useState(true);
+
+  const carregarPosts = useCallback(
+    async (offset: number) => {
+      setCarregandoPosts(true);
+      try {
+        const pagina = await apiGet<Page<Post>>(
+          `/usuarios/${username}/posts?offset=${offset}&limit=${POR_PAGINA}`
+        );
+        setPosts((atuais) => (offset === 0 ? pagina.items : [...atuais, ...pagina.items]));
+        setTotalPosts(pagina.total);
+      } catch {
+        // perfil inexistente já mostra o erro do cabeçalho
+      } finally {
+        setCarregandoPosts(false);
+      }
+    },
+    [username]
+  );
+
   useEffect(() => {
     if (!localStorage.getItem("token")) return;
     apiGet<Perfil>(`/usuarios/${username}`)
@@ -26,7 +51,8 @@ export default function PerfilPage() {
         setErro(e instanceof ApiError && e.status === 404 ? "usuário não encontrado" : "erro ao carregar o perfil")
       );
     apiGet<User>("/auth/eu").then(setEu).catch(() => {});
-  }, [username]);
+    carregarPosts(0);
+  }, [username, carregarPosts]);
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
@@ -129,6 +155,29 @@ export default function PerfilPage() {
           </div>
         </form>
       )}
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Posts</h2>
+        <ul className="space-y-3">
+          {posts.map((p) => (
+            <li key={p.id}>
+              <PostCard post={p} />
+            </li>
+          ))}
+        </ul>
+        {!carregandoPosts && posts.length === 0 && (
+          <p className="text-zinc-500">Nenhum post ainda.</p>
+        )}
+        {posts.length < totalPosts && (
+          <button
+            onClick={() => carregarPosts(posts.length)}
+            disabled={carregandoPosts}
+            className="rounded border bg-white px-3 py-1.5 text-sm disabled:opacity-50"
+          >
+            {carregandoPosts ? "carregando..." : "carregar mais"}
+          </button>
+        )}
+      </section>
     </div>
   );
 }
