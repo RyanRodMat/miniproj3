@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
+from app.models.follow import Follow
 from app.models.like import Like
 from app.models.post import Post
 from app.models.user import User
@@ -69,6 +70,27 @@ def listar_do_autor(
 ) -> tuple[list[Post], int]:
     """Posts de um usuário (página de perfil), mais novo primeiro (empate: maior id)."""
     filtro = Post.autor_id == autor_id
+    total = db.scalar(select(func.count()).select_from(Post).where(filtro)) or 0
+    posts = list(
+        db.scalars(
+            select(Post)
+            .where(filtro)
+            .order_by(Post.created_at.desc(), Post.id.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+    )
+    return posts, total
+
+
+def listar_feed(db: Session, user: User, offset: int, limit: int) -> tuple[list[Post], int]:
+    """Posts de quem `user` segue e de quem os seguidos seguem (não os próprios),
+    misturados, mais novo primeiro (empate: maior id)."""
+    seguidos = select(Follow.followed_id).where(Follow.follower_id == user.id)
+    dos_seguidos = select(Follow.followed_id).where(Follow.follower_id.in_(seguidos))
+    filtro = (Post.autor_id.in_(seguidos) | Post.autor_id.in_(dos_seguidos)) & (
+        Post.autor_id != user.id
+    )
     total = db.scalar(select(func.count()).select_from(Post).where(filtro)) or 0
     posts = list(
         db.scalars(

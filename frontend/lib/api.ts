@@ -98,6 +98,7 @@ export type Post = {
   created_at: string;
   curtidas: number;
   eu_curti: boolean;
+  autor_eu_sigo: boolean;
 };
 
 // ---- Perfil e follow (espelham PerfilOut em backend/app/schemas/user.py) ----

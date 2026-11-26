@@ -48,3 +48,24 @@ def eu_curto(db: Session, user: User, alvo_id: int) -> bool:
     return _curte(db, user.id, alvo_id)
 
 
+
+
+def contadores_em_lote(db: Session, post_ids: list[int]) -> dict[int, int]:
+    """{post_id: curtidas} numa query só (posts sem curtida ficam de fora)."""
+    linhas = db.execute(
+        select(Like.liked_post_id, func.count())
+        .where(Like.liked_post_id.in_(post_ids))
+        .group_by(Like.liked_post_id)
+    )
+    return {post_id: n for post_id, n in linhas}
+
+
+def curtidos_em_lote(db: Session, user: User, post_ids: list[int]) -> set[int]:
+    """Quais de `post_ids` o usuário curtiu, numa query só."""
+    return set(
+        db.scalars(
+            select(Like.liked_post_id).where(
+                Like.liker_id == user.id, Like.liked_post_id.in_(post_ids)
+            )
+        )
+    )

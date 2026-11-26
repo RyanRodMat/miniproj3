@@ -38,6 +38,7 @@ class PostOut(BaseModel):
     created_at: datetime
     curtidas: int = 0
     eu_curti: bool = False
+    autor_eu_sigo: bool = False  # o usuário logado segue o autor? (botão seguir no card)
 
 
 class PostPage(BaseModel):
