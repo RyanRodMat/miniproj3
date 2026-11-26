@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.deps import get_current_user
 from app.models.user import User
-from app.routers.posts import _com_curtidas
+from app.routers.posts import _com_curtidas_em_lote
 from app.schemas.post import PostPage
 from app.services import posts as service
 
@@ -18,7 +18,7 @@ def feed(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Feed cronológico: só posts de quem o usuário segue, mais novo primeiro."""
+    """Feed cronológico: posts de quem o usuário segue e de quem os seguidos seguem, mais novo primeiro."""
     posts, total = service.listar_feed(db, user, offset, limit)
-    items = [_com_curtidas(db, user, p) for p in posts]
+    items = _com_curtidas_em_lote(db, user, posts)
     return PostPage(items=items, total=total, offset=offset, limit=limit)

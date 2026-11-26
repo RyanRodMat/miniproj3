@@ -12,15 +12,26 @@ from app.services import likes as service_likes
 router = APIRouter(prefix="/posts", tags=["posts"])
 
 
+def _com_curtidas_em_lote(db: Session, user: User, posts: list) -> list[PostOut]:
+    """PostOut com curtidas, eu_curti e autor_eu_sigo; 3 queries para a página toda."""
+    ids = [p.id for p in posts]
+    curtidas = service_likes.contadores_em_lote(db, ids)
+    curtidos = service_likes.curtidos_em_lote(db, user, ids)
+    seguidos = service_follows.seguidos_em_lote(db, user, [p.autor_id for p in posts])
+    return [
+        PostOut.model_validate(p).model_copy(
+            update={
+                "curtidas": curtidas.get(p.id, 0),
+                "eu_curti": p.id in curtidos,
+                "autor_eu_sigo": p.autor_id in seguidos,
+            }
+        )
+        for p in posts
+    ]
+
+
 def _com_curtidas(db: Session, user: User, post) -> PostOut:
-    """PostOut com a contagem de curtidas e se `user` já curtiu."""
-    return PostOut.model_validate(post).model_copy(
-        update={
-            "curtidas": service_likes.contador(db, post.id),
-            "eu_curti": service_likes.eu_curto(db, user, post.id),
-            "autor_eu_sigo": service_follows.eu_sigo(db, user, post.autor_id),
-        }
-    )
+    return _com_curtidas_em_lote(db, user, [post])[0]
 
 
 @router.post("", response_model=PostOut, status_code=201)
@@ -41,7 +52,7 @@ def listar_posts(
 ):
     """Posts recentes de todo mundo. Provisório: o feed dos seguidos (GET /feed) é outra issue."""
     posts, total = service.listar_recentes(db, offset, limit)
-    items = [_com_curtidas(db, user, p) for p in posts]
+    items = _com_curtidas_em_lote(db, user, posts)
     return PostPage(items=items, total=total, offset=offset, limit=limit)
 
 

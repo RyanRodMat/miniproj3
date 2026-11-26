@@ -62,3 +62,14 @@ def usernames_seguidos(db: Session, user: User) -> list[str]:
             .where(Follow.follower_id == user.id)
         )
     )
+
+
+def seguidos_em_lote(db: Session, user: User, alvo_ids: list[int]) -> set[int]:
+    """Quais de `alvo_ids` o usuário segue, numa query só."""
+    return set(
+        db.scalars(
+            select(Follow.followed_id).where(
+                Follow.follower_id == user.id, Follow.followed_id.in_(alvo_ids)
+            )
+        )
+    )

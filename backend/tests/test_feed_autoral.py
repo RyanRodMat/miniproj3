@@ -46,3 +46,15 @@ def test_post_e_lista_dizem_se_sigo_o_autor(client, logar):
     client.post("/usuarios/bia/follow", headers=ana)
     assert client.get("/posts", headers=ana).json()["items"][0]["autor_eu_sigo"] is True
     assert client.get("/usuarios/eu/seguindo", headers=ana).json() == {"usernames": ["bia"]}
+
+
+def test_post_novo_nao_herda_curtidas_de_post_apagado(client, logar):
+    ana = logar("ana")
+    bia = logar("bia")
+    antigo = client.post("/posts", json={"texto": "velho"}, headers=ana).json()["id"]
+    client.post(f"/posts/{antigo}/curtir", headers=bia)
+    client.delete(f"/posts/{antigo}", headers=ana)
+
+    novo = client.post("/posts", json={"texto": "novo"}, headers=ana).json()
+    assert novo["curtidas"] == 0
+    assert client.get(f"/posts/{novo['id']}", headers=bia).json()["eu_curti"] is False
