@@ -157,7 +157,6 @@ def test_follow_unfollow_com_contadores(client, logar):
 # ---------- CURTIDAS ----------
 
 
-@pytest.mark.skip(reason="Remova ao implementar curtir/descurtir idempotente (núcleo)")
 def test_curtidas_idempotentes(client, logar):
     ana = logar("ana")
     bia = logar("bia")
@@ -171,6 +170,29 @@ def test_curtidas_idempotentes(client, logar):
 
     client.delete(f"/posts/{post_id}/curtir", headers=ana)
     assert client.get(f"/posts/{post_id}", headers=ana).json()["curtidas"] == 0
+
+
+def test_apagar_post_apaga_as_curtidas(client, logar):
+    """Regressão: o SQLite reaproveita o id do último post apagado, então curtidas
+    órfãs apareciam no post novo (curtidas: 1 e eu_curti: true)."""
+    from sqlalchemy import text
+
+    from app.db import SessionLocal
+
+    ana = logar("ana")
+    bia = logar("bia")
+
+    post_id = client.post("/posts", json={"texto": "vai sumir"}, headers=bia).json()["id"]
+    client.post(f"/posts/{post_id}/curtir", headers=ana)
+    assert client.delete(f"/posts/{post_id}", headers=bia).status_code == 204
+
+    with SessionLocal() as db:
+        assert db.scalar(text("select count(*) from likes")) == 0
+
+    novo = client.post("/posts", json={"texto": "outro"}, headers=bia).json()
+    corpo = client.get(f"/posts/{novo['id']}", headers=ana).json()
+    assert corpo["curtidas"] == 0
+    assert corpo["eu_curti"] is False
 
 
 # ---------- COMENTÁRIOS ----------

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { NovoPost } from "@/components/NovoPost";
 import { PostCard } from "@/components/PostCard";
-import { apiGet, type Page, type Post } from "@/lib/api";
+import { apiGet, type Page, type Post, type User } from "@/lib/api";
 import { useExigeLogin } from "@/lib/useExigeLogin";
 
 const POR_PAGINA = 10;
@@ -15,12 +15,13 @@ export default function Home() {
   const [total, setTotal] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [euId, setEuId] = useState<number>();
+  const [publicado, setPublicado] = useState(false);
 
-  // Provisório: posts recentes de todo mundo. O feed dos seguidos (GET /feed) é outra issue.
   const carregar = useCallback(async (offset: number) => {
     setCarregando(true);
     try {
-      const pagina = await apiGet<Page<Post>>(`/posts?offset=${offset}&limit=${POR_PAGINA}`);
+      const pagina = await apiGet<Page<Post>>(`/feed?offset=${offset}&limit=${POR_PAGINA}`);
       setPosts((atuais) => (offset === 0 ? pagina.items : [...atuais, ...pagina.items]));
       setTotal(pagina.total);
       setErro(null);
@@ -32,32 +33,31 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (localStorage.getItem("token")) carregar(0);
+    if (localStorage.getItem("token")) {
+      carregar(0);
+      apiGet<User>("/auth/eu").then((u) => setEuId(u.id)).catch(() => {});
+    }
   }, [carregar]);
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Feed</h1>
-      {/* a caixa fica sempre visível; ao publicar, o post entra no topo da lista */}
-      <NovoPost
-        onCriado={(post) => {
-          setPosts((atuais) => [post, ...atuais]);
-          setTotal((t) => t + 1);
-        }}
-      />
+      {/* o feed só tem quem você segue: o post novo aparece no seu perfil, não aqui */}
+      <NovoPost onCriado={() => setPublicado(true)} />
+      {publicado && <p className="text-sm text-green-700">Publicado! Ele aparece no seu perfil.</p>}
 
       {erro && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{erro}</p>}
 
       <ul className="space-y-3">
         {posts.map((p) => (
           <li key={p.id}>
-            <PostCard post={p} />
+            <PostCard post={p} euId={euId} />
           </li>
         ))}
       </ul>
 
       {!carregando && !erro && posts.length === 0 && (
-        <p className="text-zinc-500">Ainda não há posts. Publique o primeiro!</p>
+        <p className="text-zinc-500">Seu feed está vazio. Siga alguém na página de usuários para ver os posts aqui.</p>
       )}
       {posts.length < total && (
         <button

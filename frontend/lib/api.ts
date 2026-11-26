@@ -96,6 +96,8 @@ export type Post = {
   imagem_url: string | null;
   autor: Autor;
   created_at: string;
+  curtidas: number;
+  eu_curti: boolean;
 };
 
 // ---- Perfil e follow (espelham PerfilOut em backend/app/schemas/user.py) ----

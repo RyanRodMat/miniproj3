@@ -3,3 +3,4 @@ from app.models.user import User  # noqa: F401
 from app.models.session import Session  # noqa: F401
 from app.models.post import Post  # noqa: F401
 from app.models.follow import Follow  # noqa: F401
+from app.models.like import Like # noqa: F401
