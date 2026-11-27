@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.em_alta import em_alta
 from app.core.jornada import jornada
 from app.models.capitulo import Capitulo
 from app.models.decisao import Decisao
@@ -23,6 +24,7 @@ from app.schemas.jornada import (
     OpcaoOut,
     PassoOut,
 )
+from app.services import em_alta as service_em_alta
 from app.services import tags
 
 
@@ -140,6 +142,7 @@ def votar(db: Session, user: User, decisao_id: int, opcao: int) -> DecisaoOut:
     except IntegrityError:
         db.rollback()  # duas requests simultâneas: a outra venceu
         raise HTTPException(status_code=409, detail="você já votou")
+    em_alta.voto(db.get(Capitulo, decisao.capitulo_id).historia_id)
     return _out(db, user, decisao)
 
 
@@ -208,6 +211,7 @@ def criar_capitulo(
     db.add(post)
     db.commit()
     tags.indexar_post(db, post)
+    service_em_alta.registrar_post(post)
     jornada.adicionar_capitulo(capitulo.id, historia_id, dados.pai_id, dados.opcao_origem)
     return capitulo
 

@@ -1,6 +1,7 @@
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.em_alta import em_alta
 from app.models.capitulo import Capitulo
 from app.models.comentario import Comentario
 from app.models.post import Post
@@ -26,7 +27,9 @@ def _listar(db: Session, coluna, alvo_id: int, offset: int, limit: int):
 def criar_no_post(db, post_id, autor_id, texto) -> Comentario | None:
     if db.get(Post, post_id) is None:
         return None
-    return _criar(db, autor_id, texto, post_id=post_id)
+    comentario = _criar(db, autor_id, texto, post_id=post_id)
+    em_alta.comentario(post_id, +1)
+    return comentario
 
 
 def criar_no_capitulo(db, capitulo_id, autor_id, texto) -> Comentario | None:

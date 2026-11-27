@@ -59,6 +59,7 @@ tirem linhas quando mudarem de ideia.
 | Tags de interesse e Explorar | Laura | O leitor encontra artistas novos pelo gênero que gosta sem depender de já seguir alguém: `#tags` nos posts alimentam um índice invertido (`core/tags.py`, tag → posts, O(1) para consultar e O(t) para indexar), o onboarding grava as tags favoritas e o Explorar mostra primeiro o que bate com elas. |
 | Comentários (núcleo) | Ryan | O comentário é onde acontece a interação social da rede, sem eles não há engajamento e comunidade. |
 | Seed fake (núcleo) | Claude (IA) + revisão do time | A demo nunca começa vazia e o nicho (quadrinistas e ilustradores iniciantes) já aparece no conteúdo. |
+| Em alta | Ryan | Dá visibilidade a quem engaja agora, não a quem já é famoso: artista iniciante e veterano competem igual. |
 | Escolha sua jornada | Matheus | É o diferencial da rede: o leitor vota na decisão do personagem e muda o rumo da história. |
 
 ## Uma escolha técnica
@@ -93,6 +94,32 @@ vencedora e a história para ali. Se a rede crescesse 100x, o dict em memória
 continuaria O(1) por operação, mas ocuparia memória por capítulo; aí o índice
 passaria para o banco.
 
+### Em alta: heap top-K (`core/em_alta.py`)
+
+`score = (curtidas + 2·comentários + 3·votos) / (horas + 2)^1.5`. Comentário e
+voto pesam mais que curtida porque premiam discussão e participação, não só um
+toque. O expoente 1,5 faz o post envelhecer rápido: 24 h depois ele precisa de
+cerca de 40x o engajamento para ocupar o mesmo lugar. Votos de uma história
+valem para os posts dela ("novo capítulo").
+
+Como o score depende do relógio, um heap pronto ficaria velho. O que o `core/`
+guarda são os contadores por post (dict), atualizados em O(1) a cada curtida,
+comentário, voto ou post criado/apagado; o top-K sai de `heapq.nlargest` na
+consulta.
+
+| Operação | Custo |
+|---|---|
+| curtir / comentar / votar / criar / apagar | O(1) |
+| página do Em alta (top-K, K = offset + limit) | O(n log K) |
+| ordenar tudo (alternativa descartada) | O(n log n) |
+| reconstruir no startup | O(n) |
+
+`make bench` (K = 20, melhor de 5, ms): 1 000 posts 0,21 vs. 0,26; 10 000 posts
+2,18 vs. 3,49; 100 000 posts 19,65 vs. 39,52. O heap fica ~2x mais rápido e a
+diferença cresce com n, porque `nlargest` mantém só K itens em vez de ordenar
+os n. Os dois ainda são lineares na leitura dos scores; num banco real seria um
+índice ou cache com TTL.
+
 ## Uso de IA
 
 Ferramenta e para quê. Exemplo: "Claude para gerar o seed de 200 posts sobre
@@ -101,6 +128,8 @@ corrida; o resto foi escrito pelo time."
 Ryan: Claude para implementar a lógica de login, e criar conta, bem como diferenciar artista e leitor.
 Matheus: Claude para implementar Posts, Seguir e Perfil (backend, testes e telas); revisão e decisões do time.
 Laura: Claude para ajudar a implementar Curtidas e Feed e para corrigir revisões de código; Claude para implementar a seed fake e as Histórias em capítulos (backend, testes e telas).
+
+Matheus: Claude para implementar o Em alta (core/em_alta.py, aba na home, testes e bench), os Fóruns e o deploy.
 
 Matheus: Claude para implementar a feature Escolha sua jornada (decisões, votos, árvore em `core/jornada.py`, telas e testes).
 
