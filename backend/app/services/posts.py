@@ -1,6 +1,8 @@
 from fastapi import HTTPException
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
+
+from app.core.em_alta import em_alta
 from app.core.tags import indice_tags
 from app.models.comentario import Comentario
 from app.models.follow import Follow
@@ -8,6 +10,7 @@ from app.models.like import Like
 from app.models.post import Post
 from app.models.user import User
 from app.schemas.post import PostCreate, PostUpdate
+from app.services import em_alta as service_em_alta
 from app.services import tags as service_tags
 from app.services.uploads import apagar_imagem, salvar_imagem
 
@@ -18,6 +21,7 @@ def criar(db: Session, autor: User, dados: PostCreate) -> Post:
     db.commit()
     db.refresh(post)
     service_tags.indexar_post(db, post)
+    service_em_alta.registrar_post(post)
     return post
 
 
@@ -57,6 +61,7 @@ def apagar(db: Session, post: Post) -> None:
     db.commit()
     apagar_imagem(post.imagem_url)
     indice_tags.remover(post.id)
+    em_alta.remover(post.id)
 
 
 def listar_recentes(db: Session, offset: int, limit: int) -> tuple[list[Post], int]:

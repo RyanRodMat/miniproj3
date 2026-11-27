@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { MarcaMarte } from "@/components/MarcaMarte";
 import { apiPost, ApiError } from "@/lib/api";
 
 type Tipo = "artista" | "leitor";
@@ -57,6 +58,7 @@ export default function RegistroPage() {
 
   return (
     <div className="mx-auto w-full max-w-sm">
+      <MarcaMarte />
       <h1 className="mb-6 text-2xl font-semibold">Criar conta</h1>
 
       <form onSubmit={registrar} className="flex flex-col gap-4">

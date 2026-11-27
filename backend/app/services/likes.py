@@ -3,6 +3,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.em_alta import em_alta
 from app.models.like import Like
 from app.models.user import User
 from app.models.post import Post
@@ -27,6 +28,8 @@ def curtir(db: Session, user: User, post_id: int) -> None:
         db.commit()
     except IntegrityError:
         db.rollback()  # duas requests simultâneas: a outra já criou, e está tudo bem
+        return
+    em_alta.curtida(alvo.id, +1)
 
 
 def descurtir(db: Session, user: User, post_id: int) -> None:
@@ -35,6 +38,7 @@ def descurtir(db: Session, user: User, post_id: int) -> None:
     if like:
         db.delete(like)
         db.commit()
+        em_alta.curtida(alvo.id, -1)
 
 
 def contador(db: Session, post_id: int) -> int:
