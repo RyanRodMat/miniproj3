@@ -70,8 +70,11 @@ export type User = {
   name: string;
   bio: string;
   avatar_url: string;
+  tags_interesse?: string[];
   created_at: string;
 };
+
+export type TagContagem = { tag: string; contagem: number };
 
 export type Page<T> = {
   items: T[];

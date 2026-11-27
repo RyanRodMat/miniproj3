@@ -43,7 +43,7 @@ export default function RegistroPage() {
         password,
       });
       localStorage.setItem("token", token);
-      router.push("/");
+      router.push("/onboarding");
     } catch (err) {
       setErro(
         err instanceof ApiError && err.status === 409
@@ -110,7 +110,7 @@ export default function RegistroPage() {
             <label
               key={t.valor}
               className={`flex cursor-pointer flex-col rounded border px-3 py-2 text-sm ${
-                tipo === t.valor ? "border-black bg-gray-50" : "border-gray-300"
+                tipo === t.valor ? "border-zinc-900 bg-gray-50" : "border-gray-300"
               }`}
             >
               <span className="flex items-center gap-2 font-medium">
@@ -137,7 +137,7 @@ export default function RegistroPage() {
         <button
           type="submit"
           disabled={enviando}
-          className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+          className="rounded bg-zinc-900 px-4 py-2 text-white disabled:opacity-50"
         >
           {enviando ? "Criando conta..." : "Criar conta"}
         </button>

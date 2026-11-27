@@ -2,11 +2,13 @@ from fastapi import HTTPException
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
+from app.core.tags import indice_tags
 from app.models.follow import Follow
 from app.models.like import Like
 from app.models.post import Post
 from app.models.user import User
 from app.schemas.post import PostCreate, PostUpdate
+from app.services import tags as service_tags
 
 
 def criar(db: Session, autor: User, dados: PostCreate) -> Post:
@@ -14,6 +16,7 @@ def criar(db: Session, autor: User, dados: PostCreate) -> Post:
     db.add(post)
     db.commit()
     db.refresh(post)
+    service_tags.indexar_post(db, post)
     return post
 
 
@@ -42,6 +45,7 @@ def atualizar(db: Session, post: Post, dados: PostUpdate) -> Post:
         post.imagem_url = dados.imagem_url
     db.commit()
     db.refresh(post)
+    service_tags.indexar_post(db, post)
     return post
 
 
@@ -49,6 +53,7 @@ def apagar(db: Session, post: Post) -> None:
     db.execute(delete(Like).where(Like.liked_post_id == post.id))
     db.delete(post)
     db.commit()
+    indice_tags.remover(post.id)
 
 
 def listar_recentes(db: Session, offset: int, limit: int) -> tuple[list[Post], int]:

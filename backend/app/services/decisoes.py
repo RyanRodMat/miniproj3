@@ -23,6 +23,7 @@ from app.schemas.jornada import (
     OpcaoOut,
     PassoOut,
 )
+from app.services import tags
 
 
 def _agora() -> datetime:
@@ -198,15 +199,15 @@ def criar_capitulo(
         for i, url in enumerate(dados.paginas, start=1)
     )
     # capítulo novo vira post no feed de quem segue o artista
-    db.add(
-        Post(
-            autor_id=user.id,
-            texto=f"Novo capítulo de {historia.titulo}: {capitulo.titulo}",
-            imagem_url=capitulo.imagem_url,
-            historia_id=historia.id,
-        )
+    post = Post(
+        autor_id=user.id,
+        texto=f"Novo capítulo de {historia.titulo}: {capitulo.titulo}",
+        imagem_url=capitulo.imagem_url,
+        historia_id=historia.id,
     )
+    db.add(post)
     db.commit()
+    tags.indexar_post(db, post)
     jornada.adicionar_capitulo(capitulo.id, historia_id, dados.pai_id, dados.opcao_origem)
     return capitulo
 
