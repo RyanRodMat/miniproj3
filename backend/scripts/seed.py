@@ -24,13 +24,16 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db import Base, SessionLocal, engine
-from app.models.decisao import Decisao, Opcao, Voto
+from app.models.decisao import Decisao
 from app.models.follow import Follow
-from app.models.historia import Capitulo, Historia
+from app.models.capitulo import Capitulo
+from app.models.historia import Historia
 from app.models.interesse import Interesse
 from app.models.like import Like
 from app.models.post import Post
 from app.models.user import User
+from app.models.voto import Voto
+from app.services.decisoes import reconstruir_jornada
 
 SENHA_SEED = "quadrinhos-123"
 SEMENTE = 2026
@@ -322,32 +325,49 @@ def seed_fake(db: Session) -> dict[str, int]:
         )
         db.add(historia)
         db.flush()
-        for ordem, cap in enumerate(h["capitulos"], start=1):
+        pai: Capitulo | None = None
+        opcao_vencedora: int | None = None
+        for numero, cap in enumerate(h["capitulos"], start=1):
+            # cada capítulo nasce da opção vencedora da decisão do anterior (jornada)
             capitulo = Capitulo(
                 historia_id=historia.id,
-                ordem=ordem,
+                numero=numero,
                 titulo=cap["titulo"],
                 texto=cap["texto"],
                 imagem_url=f"/seed/{cap['imagem']}.svg",
+                pai_id=pai.id if pai else None,
+                opcao_origem=opcao_vencedora,
             )
             db.add(capitulo)
             db.flush()
             pergunta, textos, aberta = cap["decisao"]
-            decisao = Decisao(capitulo_id=capitulo.id, pergunta=pergunta, aberta=aberta)
+            decisao = Decisao(
+                capitulo_id=capitulo.id,
+                pergunta=pergunta,
+                opcoes=textos,
+                # prazo em UTC sem fuso, como o resto do model
+                prazo=(agora + timedelta(days=3 if aberta else -(8 - numero)))
+                .astimezone(timezone.utc)
+                .replace(tzinfo=None),
+            )
             db.add(decisao)
-            db.flush()
-            opcoes = [Opcao(decisao_id=decisao.id, texto=t) for t in textos]
-            db.add_all(opcoes)
             db.flush()
             n_decisoes += 1
             # leitores votam em todas; só quem não é o autor da história
+            contagem = [0] * len(textos)
             for u in todos:
                 if u.id == historia.autor_id or rng.random() < 0.25:
                     continue
-                db.add(Voto(user_id=u.id, decisao_id=decisao.id, opcao_id=rng.choice(opcoes).id))
+                opcao = rng.randrange(len(textos))
+                db.add(Voto(user_id=u.id, decisao_id=decisao.id, opcao=opcao))
+                contagem[opcao] += 1
                 n_votos += 1
+            # empate vence a opção de menor índice (regra do core/jornada.py)
+            opcao_vencedora = max(range(len(textos)), key=lambda i: (contagem[i], -i))
+            pai = capitulo
 
     db.commit()
+    reconstruir_jornada(db)  # a árvore em memória do core/ acompanha o banco
     return {
         "usuarios": len(usuarios),
         "posts": len(posts),
