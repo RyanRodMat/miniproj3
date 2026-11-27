@@ -58,6 +58,7 @@ tirem linhas quando mudarem de ideia.
 | Histórias em capítulos | Laura | É o formato central da rede: o artista publica a história em capítulos (páginas em sequência), não em posts soltos; cada capítulo novo vira um post no feed. |
 | Comentários (núcleo) | | |
 | Seed fake (núcleo) | Claude (IA) + revisão do time | A demo nunca começa vazia e o nicho (quadrinistas e ilustradores iniciantes) já aparece no conteúdo. |
+| Escolha sua jornada | Matheus | É o diferencial da rede: o leitor vota na decisão do personagem e muda o rumo da história. |
 
 ## Uma escolha técnica
 
@@ -65,6 +66,31 @@ Contem uma escolha técnica que o time fez e por quê. Por exemplo, por que usou
 uma estrutura de dados no `core/`, qual o Big O da operação principal, ou o
 que mudaria se a rede crescesse 100 vezes. Se mediram com `make bench`, colem a
 saída e uma frase dizendo o que os números mostram.
+
+### Escolha sua jornada: árvore da história (`core/jornada.py`)
+
+Cada capítulo é um nó; as opções da decisão no fim dele são as arestas. A
+opção vencedora aponta para o próximo capítulo, e as que não venceram ficam
+guardadas só como texto ("o que poderia ter sido"). A estrutura é um
+`dict[capitulo_id -> No]` mais um `dict[historia_id -> raiz]`, em Python puro,
+e o endpoint `GET /historias/{id}/jornada` a usa para montar o mapa.
+
+| Operação | Custo | Por quê |
+|---|---|---|
+| publicar capítulo / abrir decisão | O(1) | inserção em dict + um dict de filhos por opção |
+| encerrar votação (calcula a vencedora) | O(k), k ≤ 4 → O(1) | máximo sobre no máximo 4 contagens |
+| vencedora / encerrada / filho de uma opção | O(1) | lookup em hash |
+| caminho tomado (mapa) | O(d), d = capítulos já percorridos | segue só a aresta vencedora; não olha os ramos mortos |
+| reconstruir no startup | O(n) | uma passada nos capítulos e decisões do banco |
+
+Sem a árvore, achar o caminho exigiria, a cada capítulo, buscar no banco a
+decisão e contar os votos (d consultas por request). Com ela, o banco só é
+consultado para votos ainda abertos. Não há timer: o encerramento é detectado
+na primeira leitura ou escrita depois do prazo (`sincronizar`), que fecha o nó
+em O(1). Empate vence a opção de menor índice; votação sem votos não tem
+vencedora e a história para ali. Se a rede crescesse 100x, o dict em memória
+continuaria O(1) por operação, mas ocuparia memória por capítulo; aí o índice
+passaria para o banco.
 
 ## Uso de IA
 
@@ -74,5 +100,7 @@ corrida; o resto foi escrito pelo time."
 Ryan: Claude para implementar a lógica de login, e criar conta, bem como diferenciar artista e leitor.
 Matheus: Claude para implementar Posts, Seguir e Perfil (backend, testes e telas); revisão e decisões do time.
 Laura: Claude para ajudar a implementar Curtidas e Feed e para corrigir revisões de código; Claude para implementar a seed fake e as Histórias em capítulos (backend, testes e telas).
+
+Matheus: Claude para implementar a feature Escolha sua jornada (decisões, votos, árvore em `core/jornada.py`, telas e testes).
 
 Senha de todos os usuários do seed fake: `quadrinhos-123` (definida em `SENHA_SEED`, em `backend/scripts/seed.py`).

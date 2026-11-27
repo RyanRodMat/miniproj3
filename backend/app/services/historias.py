@@ -1,15 +1,15 @@
 import re
 
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.historia import Capitulo, Historia, Pagina
-from app.models.post import Post
+from app.models.capitulo import Capitulo
+from app.models.historia import Historia
+from app.models.pagina import Pagina
 from app.models.user import User
 from app.schemas.historia import (
-    CapituloCreate,
-    CapituloOut,
+    CapituloDetalhe,
     CapituloResumo,
     HistoriaCreate,
     HistoriaOut,
@@ -28,14 +28,12 @@ def normalizar_tags(tags: list[str]) -> list[str]:
 
 def criar(db: Session, autor: User, dados: HistoriaCreate) -> Historia:
     tags = normalizar_tags(dados.tags)
-    if not tags:
-        raise HTTPException(status_code=422, detail="informe ao menos uma tag")
     historia = Historia(
         autor_id=autor.id,
         titulo=dados.titulo,
         sinopse=dados.sinopse,
         capa_url=dados.capa_url,
-        tag=tags[0],
+        tag=tags[0] if tags else "",
         tags=",".join(tags),
     )
     db.add(historia)
@@ -56,14 +54,14 @@ def _capitulos(db: Session, historia_id: int) -> list[Capitulo]:
         db.scalars(
             select(Capitulo)
             .where(Capitulo.historia_id == historia_id)
-            .order_by(Capitulo.ordem)
+            .order_by(Capitulo.numero)
         )
     )
 
 
 def detalhe(db: Session, historia: Historia) -> HistoriaOut:
     """História com a lista de capítulos em ordem (sem as páginas)."""
-    tags = [t for t in historia.tags.split(",") if t] or [historia.tag]
+    tags = [t for t in historia.tags.split(",") if t] or ([historia.tag] if historia.tag else [])
     return HistoriaOut(
         id=historia.id,
         titulo=historia.titulo,
@@ -73,48 +71,13 @@ def detalhe(db: Session, historia: Historia) -> HistoriaOut:
         autor=historia.autor,
         created_at=historia.created_at,
         capitulos=[
-            CapituloResumo(id=c.id, numero=c.ordem, titulo=c.titulo)
+            CapituloResumo(id=c.id, numero=c.numero, titulo=c.titulo)
             for c in _capitulos(db, historia.id)
         ],
     )
 
 
-def publicar_capitulo(
-    db: Session, historia: Historia, autor: User, dados: CapituloCreate
-) -> Capitulo:
-    """Cria o capítulo (número = próximo da história) e o post "novo capítulo" no feed."""
-    if historia.autor_id != autor.id:
-        raise HTTPException(status_code=403, detail="só o autor publica capítulos")
-    ultimo = db.scalar(
-        select(func.max(Capitulo.ordem)).where(Capitulo.historia_id == historia.id)
-    )
-    capitulo = Capitulo(
-        historia_id=historia.id,
-        ordem=(ultimo or 0) + 1,
-        titulo=dados.titulo,
-        texto=dados.texto,
-        imagem_url=dados.paginas[0],
-    )
-    db.add(capitulo)
-    db.flush()
-    db.add_all(
-        Pagina(capitulo_id=capitulo.id, ordem=i, imagem_url=url)
-        for i, url in enumerate(dados.paginas, start=1)
-    )
-    db.add(
-        Post(
-            autor_id=autor.id,
-            texto=f"Novo capítulo de {historia.titulo}: {capitulo.titulo}",
-            imagem_url=dados.paginas[0],
-            historia_id=historia.id,
-        )
-    )
-    db.commit()
-    db.refresh(capitulo)
-    return capitulo
-
-
-def capitulo_out(db: Session, capitulo: Capitulo) -> CapituloOut:
+def capitulo_detalhe(db: Session, capitulo: Capitulo) -> CapituloDetalhe:
     paginas = list(
         db.scalars(
             select(Pagina.imagem_url)
@@ -125,10 +88,10 @@ def capitulo_out(db: Session, capitulo: Capitulo) -> CapituloOut:
     # capítulo do seed: sem `Pagina`, a imagem única vira a única página
     if not paginas and capitulo.imagem_url:
         paginas = [capitulo.imagem_url]
-    return CapituloOut(
+    return CapituloDetalhe(
         id=capitulo.id,
         historia_id=capitulo.historia_id,
-        numero=capitulo.ordem,
+        numero=capitulo.numero,
         titulo=capitulo.titulo,
         texto=capitulo.texto,
         paginas=paginas,
@@ -138,7 +101,7 @@ def capitulo_out(db: Session, capitulo: Capitulo) -> CapituloOut:
 def buscar_capitulo(db: Session, historia_id: int, numero: int) -> Capitulo:
     capitulo = db.scalar(
         select(Capitulo).where(
-            Capitulo.historia_id == historia_id, Capitulo.ordem == numero
+            Capitulo.historia_id == historia_id, Capitulo.numero == numero
         )
     )
     if not capitulo:

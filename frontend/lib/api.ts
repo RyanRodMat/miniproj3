@@ -131,3 +131,35 @@ export type Historia = {
   created_at: string;
   capitulos: CapituloResumo[];
 };
+
+// ---- Jornada (espelham backend/app/schemas/jornada.py) ----
+
+export type Decisao = {
+  id: number;
+  capitulo_id: number;
+  pergunta: string;
+  opcoes: { texto: string; votos: number }[];
+  total_votos: number;
+  ja_votei: boolean;
+  minha_opcao: number | null;
+  encerrada: boolean;
+  vencedora: number | null;
+  prazo: string;
+};
+
+export type Jornada = {
+  historia_id: number;
+  titulo: string;
+  caminho: {
+    capitulo_id: number;
+    numero: number;
+    titulo: string;
+    decisao: {
+      id: number;
+      pergunta: string;
+      prazo: string;
+      encerrada: boolean;
+      opcoes: { indice: number; texto: string; votos: number; escolhida: boolean }[];
+    } | null;
+  }[];
+};

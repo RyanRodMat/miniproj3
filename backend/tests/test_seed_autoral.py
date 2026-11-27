@@ -16,13 +16,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import seed  # noqa: E402
 
 from app.db import SessionLocal  # noqa: E402
-from app.models.decisao import Decisao, Opcao, Voto  # noqa: E402
+from app.models.capitulo import Capitulo  # noqa: E402
+from app.models.decisao import Decisao  # noqa: E402
 from app.models.follow import Follow  # noqa: E402
-from app.models.historia import Capitulo, Historia  # noqa: E402
+from app.models.historia import Historia  # noqa: E402
 from app.models.interesse import Interesse  # noqa: E402
 from app.models.like import Like  # noqa: E402
 from app.models.post import Post  # noqa: E402
 from app.models.user import User  # noqa: E402
+from app.models.voto import Voto  # noqa: E402
+from app.services.decisoes import _agora  # noqa: E402
 from app.schemas.post import URL_PATTERN  # noqa: E402
 
 PUBLIC_SEED = Path(__file__).resolve().parents[2] / "frontend" / "public" / "seed"
@@ -113,22 +116,22 @@ def test_tags_de_interesse_sao_coerentes(db):
 
 def test_historias_tem_capitulos_decisoes_votadas_e_uma_em_aberto(db):
     assert 1 <= _contar(db, Historia) <= 2
-    assert db.scalar(select(func.count()).select_from(Decisao).where(Decisao.aberta.is_(True))) >= 1
-    assert db.scalar(select(func.count()).select_from(Decisao).where(Decisao.aberta.is_(False))) >= 1
+    abertas = db.scalar(select(func.count()).select_from(Decisao).where(Decisao.prazo > _agora()))
+    assert abertas >= 1
+    assert db.scalar(select(func.count()).select_from(Decisao).where(Decisao.prazo <= _agora())) >= 1
 
     for historia in db.scalars(select(Historia)):
-        caps = list(db.scalars(select(Capitulo).where(Capitulo.historia_id == historia.id).order_by(Capitulo.ordem)))
+        caps = list(db.scalars(select(Capitulo).where(Capitulo.historia_id == historia.id).order_by(Capitulo.numero)))
         assert len(caps) >= 2
-        assert [c.ordem for c in caps] == list(range(1, len(caps) + 1))
+        assert [c.numero for c in caps] == list(range(1, len(caps) + 1))
         tags_autor = set(db.scalars(select(Interesse.tag).where(Interesse.user_id == historia.autor_id)))
         assert historia.tag in tags_autor
 
     for decisao in db.scalars(select(Decisao)):
-        opcoes = list(db.scalars(select(Opcao.id).where(Opcao.decisao_id == decisao.id)))
-        assert len(opcoes) >= 2
+        assert len(decisao.opcoes) >= 2
         votos = list(db.scalars(select(Voto).where(Voto.decisao_id == decisao.id)))
         assert votos, "toda decisão (inclusive a aberta) já tem voto, para a demo não ficar vazia"
-        assert all(v.opcao_id in opcoes for v in votos)
+        assert all(0 <= v.opcao < len(decisao.opcoes) for v in votos)
 
 
 def test_so_a_ultima_decisao_de_cada_historia_esta_aberta(db):
@@ -138,10 +141,28 @@ def test_so_a_ultima_decisao_de_cada_historia_esta_aberta(db):
                 select(Decisao)
                 .join(Capitulo, Capitulo.id == Decisao.capitulo_id)
                 .where(Capitulo.historia_id == historia.id)
-                .order_by(Capitulo.ordem)
+                .order_by(Capitulo.numero)
             )
         )
-        assert [d.aberta for d in decisoes] == [False] * (len(decisoes) - 1) + [True]
+        assert [d.prazo > _agora() for d in decisoes] == [False] * (len(decisoes) - 1) + [True]
+
+
+def test_capitulos_seguem_a_opcao_vencedora_e_o_mapa_da_jornada_funciona(db, client):
+    """O seed tem que respeitar a regra da jornada: o capítulo seguinte nasce da opção vencedora."""
+    for historia in db.scalars(select(Historia)):
+        caps = list(db.scalars(select(Capitulo).where(Capitulo.historia_id == historia.id).order_by(Capitulo.numero)))
+        assert caps[0].pai_id is None and caps[0].opcao_origem is None
+        for anterior, cap in zip(caps, caps[1:]):
+            decisao = db.scalar(select(Decisao).where(Decisao.capitulo_id == anterior.id))
+            contagem = [0] * len(decisao.opcoes)
+            for v in db.scalars(select(Voto).where(Voto.decisao_id == decisao.id)):
+                contagem[v.opcao] += 1
+            vencedora = max(range(len(contagem)), key=lambda i: (contagem[i], -i))
+            assert (cap.pai_id, cap.opcao_origem) == (anterior.id, vencedora)
+
+        r = client.get(f"/historias/{historia.id}/jornada", headers=_token(client, "leo_leitor"))
+        assert r.status_code == 200
+        assert [p["numero"] for p in r.json()["caminho"]] == [c.numero for c in caps]
 
 
 def test_autor_da_historia_nao_vota_nela(db):

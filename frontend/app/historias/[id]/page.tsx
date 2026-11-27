@@ -2,16 +2,23 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import { ApiError, apiGet, type Historia } from "@/lib/api";
+import { BlocoVotacao } from "@/components/BlocoVotacao";
+import { MapaJornada } from "@/components/MapaJornada";
+import { ApiError, apiGet, type Historia, type Jornada } from "@/lib/api";
 import { useExigeLogin } from "@/lib/useExigeLogin";
 
 export default function HistoriaPage() {
   useExigeLogin();
   const { id } = useParams<{ id: string }>();
   const [historia, setHistoria] = useState<Historia | null>(null);
+  const [jornada, setJornada] = useState<Jornada | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+
+  const carregarJornada = useCallback(() => {
+    apiGet<Jornada>(`/historias/${id}/jornada`).then(setJornada).catch(() => {});
+  }, [id]);
 
   useEffect(() => {
     if (!localStorage.getItem("token")) return;
@@ -20,10 +27,15 @@ export default function HistoriaPage() {
       .catch((e) =>
         setErro(e instanceof ApiError && e.status === 404 ? "história não encontrada" : "erro ao carregar a história")
       );
-  }, [id]);
+    carregarJornada();
+  }, [id, carregarJornada]);
 
   if (erro) return <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{erro}</p>;
   if (!historia) return null;
+
+  // a decisão em aberto é a do último capítulo do caminho
+  const ultimo = jornada?.caminho.at(-1);
+  const emVotacao = ultimo?.decisao && !ultimo.decisao.encerrada ? ultimo.decisao : null;
 
   return (
     <div className="space-y-6">
@@ -64,6 +76,15 @@ export default function HistoriaPage() {
           ))}
         </ol>
       </section>
+
+      {emVotacao && <BlocoVotacao decisaoId={emVotacao.id} aoEncerrar={carregarJornada} />}
+
+      {jornada && jornada.caminho.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-sm font-medium text-zinc-600">Mapa da jornada</h2>
+          <MapaJornada jornada={jornada} />
+        </section>
+      )}
     </div>
   );
 }

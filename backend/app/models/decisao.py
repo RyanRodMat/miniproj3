@@ -1,35 +1,22 @@
-from sqlalchemy import ForeignKey, String
+from datetime import datetime, timezone
+
+from sqlalchemy import JSON, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
 
 
 class Decisao(Base):
-    """Bifurcação no fim de um capítulo. `aberta` = a votação ainda está rolando."""
+    """O capítulo termina numa decisão: 2 a 4 opções, votação até o prazo."""
 
     __tablename__ = "decisoes"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    capitulo_id: Mapped[int] = mapped_column(ForeignKey("capitulos.id"), index=True)
-    pergunta: Mapped[str] = mapped_column(String(200))
-    aberta: Mapped[bool] = mapped_column(default=True)
-
-
-class Opcao(Base):
-    __tablename__ = "opcoes"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    decisao_id: Mapped[int] = mapped_column(ForeignKey("decisoes.id"), index=True)
-    texto: Mapped[str] = mapped_column(String(200))
-
-
-class Voto(Base):
-    """Um voto por usuário por decisão (chave composta)."""
-
-    __tablename__ = "votos"
-
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    decisao_id: Mapped[int] = mapped_column(
-        ForeignKey("decisoes.id"), primary_key=True
+    capitulo_id: Mapped[int] = mapped_column(ForeignKey("capitulos.id"), unique=True)
+    pergunta: Mapped[str] = mapped_column(String(300))
+    opcoes: Mapped[list[str]] = mapped_column(JSON)
+    # UTC sem fuso (o SQLite não guarda tzinfo); o schema devolve com "Z"
+    prazo: Mapped[datetime]
+    created_at: Mapped[datetime] = mapped_column(
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
     )
-    opcao_id: Mapped[int] = mapped_column(ForeignKey("opcoes.id"), index=True)
