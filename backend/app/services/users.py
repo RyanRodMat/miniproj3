@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.contadores import contador_iniciais
 from app.models.user import User
 from app.schemas.user import PerfilOut, PerfilUpdate, UserCreate, UserOut
-from app.services import follows
+from app.services import follows, tags
 
 
 def listar(db: Session, offset: int, limit: int) -> tuple[list[User], int]:
@@ -57,7 +57,13 @@ def atualizar_perfil(db: Session, user: User, dados: PerfilUpdate) -> User:
         valor = getattr(dados, campo)
         if valor is None:
             raise HTTPException(status_code=422, detail=f"{campo} não pode ser nulo")
-        setattr(user, campo, valor)
+        if campo == "tags_interesse":
+            limpas = tags.normalizar_interesses(valor)
+            if limpas is None:
+                raise HTTPException(status_code=422, detail="tag inválida: use [a-z0-9_]+")
+            tags.definir_interesses(db, user, limpas)
+        else:
+            setattr(user, campo, valor)
     db.commit()
     db.refresh(user)
     return user

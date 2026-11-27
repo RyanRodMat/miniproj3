@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { BotaoCurtir } from "@/components/BotaoCurtir";
 import { BotaoSeguir } from "@/components/BotaoSeguir";
+import { TextoComTags } from "@/components/TextoComTags";
 import type { Post } from "@/lib/api";
 
 /**
@@ -26,7 +27,9 @@ export function PostCard({ post, euId }: { post: Post; euId?: number }) {
           <time dateTime={post.created_at}>{new Date(post.created_at).toLocaleString("pt-BR")}</time>
         </Link>
       </header>
-      <p className="whitespace-pre-wrap">{post.texto}</p>
+      <p className="whitespace-pre-wrap">
+        <TextoComTags texto={post.texto} />
+      </p>
       {post.imagem_url && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={post.imagem_url} alt="" className="max-h-[32rem] w-full rounded object-contain" />

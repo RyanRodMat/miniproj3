@@ -19,6 +19,7 @@ class UserOut(BaseModel):
     bio: str
     avatar_url: str
     tipo: Literal["artista", "leitor"]
+    tags_interesse: list[str] = []
     created_at: datetime
 
 class PerfilOut(UserOut):
@@ -35,6 +36,8 @@ class PerfilUpdate(BaseModel):
     bio: str | None = Field(default=None, max_length=280)
     # só http(s) ou caminho do backend; bloqueia javascript:
     avatar_url: str | None = Field(default=None, max_length=300, pattern=r"^(|(https?://|/)\S+)$")
+    # substitui as tags de interesse (onboarding); [] limpa. Até 10, só [a-z0-9_]+
+    tags_interesse: list[str] | None = Field(default=None, max_length=10)
 
 
 class UserPage(BaseModel):
