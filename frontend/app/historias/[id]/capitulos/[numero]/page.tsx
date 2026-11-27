@@ -67,7 +67,7 @@ export default function CapituloPage() {
       {navegacao}
       <div className="flex flex-col">
         {capitulo.paginas.map((url, i) => (
-        // eslint-disable-next-line @next/next/no-img-element
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             key={url + i}
             src={apiUrl(url)}

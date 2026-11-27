@@ -78,9 +78,15 @@ def test_post_inexistente_e_sem_login(client):
     assert client.post("/posts/99999/imagem", files=_arquivo(), headers=ana).status_code == 404
     assert client.post("/posts/1/imagem", files=_arquivo()).status_code == 401
 
-def test_endpoint_generico_de_imagem(client, tmp_path):
+
+def test_trocar_e_apagar_removem_o_arquivo_antigo(client, tmp_path):
     ana = _artista(client, "ana")
-    r = client.post("/imagens", files=_arquivo(), headers=ana)
-    assert r.status_code == 200
-    assert r.json()["imagem_url"].startswith("/uploads/")
-    assert client.post("/imagens", files=_arquivo()).status_code == 401
+    pid = _post(client, ana)
+
+    primeira = client.post(f"/posts/{pid}/imagem", files=_arquivo(), headers=ana).json()["imagem_url"]
+    segunda = client.post(f"/posts/{pid}/imagem", files=_arquivo(), headers=ana).json()["imagem_url"]
+    assert not (tmp_path / primeira.rsplit("/", 1)[1]).exists()
+    assert (tmp_path / segunda.rsplit("/", 1)[1]).exists()
+
+    assert client.delete(f"/posts/{pid}", headers=ana).status_code == 204
+    assert list(tmp_path.iterdir()) == []

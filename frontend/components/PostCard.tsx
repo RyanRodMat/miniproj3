@@ -31,13 +31,13 @@ export function PostCard({ post, euId }: { post: Post; euId?: number }) {
         <TextoComTags texto={post.texto} />
       </p>
       {post.imagem_url && (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
           src={apiUrl(post.imagem_url)}
           alt={`Imagem publicada por ${post.autor.name}`}
           className="max-h-[32rem] w-full rounded object-contain"
-          />
-        )}
+        />
+      )}
       {post.historia_id !== null && (
         <Link href={`/historias/${post.historia_id}`} className="block text-sm text-amber-800 hover:underline">
           ler a história →

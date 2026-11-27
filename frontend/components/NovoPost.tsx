@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 
-import { apiPost, apiUpload, type Post } from "@/lib/api";
+import { apiDelete, apiPost, apiUpload, type Post } from "@/lib/api";
 
 const TIPOS = ["image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 2 * 1024 * 1024;
@@ -43,8 +43,9 @@ export function NovoPost({ onCriado }: { onCriado: (post: Post) => void }) {
           );
           post = { ...post, imagem_url };
         } catch (err) {
-          const msg = err instanceof Error ? err.message : "erro no upload";
-          setErro(`Post publicado, mas a imagem falhou: ${msg}`);
+          // desfaz o post para o usuário tentar de novo sem duplicar nem perder o texto
+          await apiDelete(`/posts/${post.id}`).catch(() => {});
+          throw err;
         }
       }
       setTexto("");
