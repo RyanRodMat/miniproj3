@@ -3,7 +3,6 @@ import re
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-
 from app.models.capitulo import Capitulo
 from app.models.historia import Historia
 from app.models.pagina import Pagina
