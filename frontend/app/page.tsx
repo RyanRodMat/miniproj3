@@ -10,10 +10,11 @@ import { useExigeLogin } from "@/lib/useExigeLogin";
 
 const POR_PAGINA = 10;
 
-type Aba = "seguindo" | "para-voce";
+type Aba = "seguindo" | "para-voce" | "em-alta";
 const ABAS: { id: Aba; titulo: string; rota: string }[] = [
   { id: "seguindo", titulo: "Seguindo", rota: "/feed" },
   { id: "para-voce", titulo: "Para você", rota: "/explorar" },
+  { id: "em-alta", titulo: "Em alta", rota: "/em-alta" },
 ];
 
 type Feed = { posts: Post[]; total: number; carregando: boolean; erro: string | null };
@@ -22,7 +23,7 @@ const FEED_VAZIO: Feed = { posts: [], total: 0, carregando: true, erro: null };
 export default function Home() {
   useExigeLogin();
   // um feed por aba, carregados juntos: trocar de aba só muda qual deles aparece
-  const [feeds, setFeeds] = useState<Record<Aba, Feed>>({ seguindo: FEED_VAZIO, "para-voce": FEED_VAZIO });
+  const [feeds, setFeeds] = useState<Record<Aba, Feed>>({ seguindo: FEED_VAZIO, "para-voce": FEED_VAZIO, "em-alta": FEED_VAZIO });
   const [euId, setEuId] = useState<number>();
   const [publicado, setPublicado] = useState(false);
   const [aba, setAba] = useState<Aba>("seguindo");
@@ -101,6 +102,8 @@ export default function Home() {
         <p className="text-zinc-500">
           {aba === "seguindo"
             ? "Seu feed está vazio. Siga alguém na página de usuários para ver os posts aqui."
+            : aba === "em-alta"
+            ? "Nada em alta por enquanto."
             : "Nenhum post por aqui ainda."}
         </p>
       )}
