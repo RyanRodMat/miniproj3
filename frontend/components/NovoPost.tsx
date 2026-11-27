@@ -1,26 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
-import { apiPost, type Post } from "@/lib/api";
+import { apiPost, apiUpload, type Post } from "@/lib/api";
+
+const TIPOS = ["image/jpeg", "image/png", "image/webp"];
+const MAX_BYTES = 2 * 1024 * 1024;
 
 export function NovoPost({ onCriado }: { onCriado: (post: Post) => void }) {
   const [texto, setTexto] = useState("");
-  const [imagemUrl, setImagemUrl] = useState("");
+  const [arquivo, setArquivo] = useState<File | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function escolher(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0] ?? null;
+    setErro(null);
+    if (f && !TIPOS.includes(f.type)) {
+      setErro("Use uma imagem jpg, png ou webp.");
+    } else if (f && f.size > MAX_BYTES) {
+      setErro("A imagem passa de 2 MB.");
+    } else {
+      setArquivo(f);
+      return;
+    }
+    e.target.value = "";
+    setArquivo(null);
+  }
 
   async function publicar(e: React.FormEvent) {
     e.preventDefault();
     setEnviando(true);
     setErro(null);
     try {
-      const post = await apiPost<Post>("/posts", {
-        texto,
-        imagem_url: imagemUrl.trim() || null,
-      });
+      let post = await apiPost<Post>("/posts", { texto });
+      if (arquivo) {
+        try {
+          const { imagem_url } = await apiUpload<{ imagem_url: string }>(
+            `/posts/${post.id}/imagem`,
+            arquivo,
+          );
+          post = { ...post, imagem_url };
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "erro no upload";
+          setErro(`Post publicado, mas a imagem falhou: ${msg}`);
+        }
+      }
       setTexto("");
-      setImagemUrl("");
+      setArquivo(null);
+      if (inputRef.current) inputRef.current.value = "";
       onCriado(post);
     } catch (err) {
       setErro(err instanceof Error ? err.message : "erro ao publicar");
@@ -41,11 +70,11 @@ export function NovoPost({ onCriado }: { onCriado: (post: Post) => void }) {
         className="w-full rounded border px-2 py-1"
       />
       <input
-        value={imagemUrl}
-        onChange={(e) => setImagemUrl(e.target.value)}
-        placeholder="URL da imagem (opcional — o upload vem na issue de upload)"
-        type="url"
-        className="w-full rounded border px-2 py-1 text-sm"
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={escolher}
+        className="w-full text-sm"
       />
       {erro && <p className="text-sm text-red-700">{erro}</p>}
       <button
