@@ -50,6 +50,12 @@ export default function HistoriaPage() {
             por {historia.autor.name} (@{historia.autor.username})
           </Link>
           <p className="whitespace-pre-wrap">{historia.sinopse}</p>
+          <a
+            href="#jornada"
+            className="inline-block rounded border border-amber-400 bg-amber-50 px-3 py-1 text-sm text-amber-900 hover:bg-amber-100"
+          >
+            Ver jornada
+          </a>
           <ul className="flex flex-wrap gap-1.5">
             {historia.tags.map((t) => (
               <li key={t} className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-600">
@@ -79,12 +85,14 @@ export default function HistoriaPage() {
 
       {emVotacao && <BlocoVotacao decisaoId={emVotacao.id} aoEncerrar={carregarJornada} />}
 
-      {jornada && jornada.caminho.length > 0 && (
-        <section className="space-y-2">
-          <h2 className="text-sm font-medium text-zinc-600">Mapa da jornada</h2>
+      <section id="jornada" className="scroll-mt-4 space-y-2">
+        <h2 className="text-sm font-medium text-zinc-600">Mapa da jornada</h2>
+        {jornada && jornada.caminho.length > 0 ? (
           <MapaJornada jornada={jornada} />
-        </section>
-      )}
+        ) : (
+          <p className="text-sm text-zinc-500">A jornada começa quando o primeiro capítulo for publicado.</p>
+        )}
+      </section>
     </div>
   );
 }

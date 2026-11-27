@@ -41,9 +41,17 @@ export function PostCard({ post, euId, comentarios = true }: { post: Post; euId?
         />
       )}
       {post.historia_id !== null && (
-        <Link href={`/historias/${post.historia_id}`} className="block text-sm text-amber-800 hover:underline">
-          ler a história →
-        </Link>
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <Link href={`/historias/${post.historia_id}`} className="text-amber-800 hover:underline">
+            ler a história →
+          </Link>
+          <Link
+            href={`/historias/${post.historia_id}#jornada`}
+            className="rounded border border-amber-400 bg-amber-50 px-2 py-0.5 text-amber-900 hover:bg-amber-100"
+          >
+            Ver jornada
+          </Link>
+        </div>
       )}
       {comentarios ? (
         <ComentariosDoPost postId={post.id}>
