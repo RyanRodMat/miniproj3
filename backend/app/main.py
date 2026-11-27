@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -17,6 +18,13 @@ from app.services.uploads import UPLOAD_DIR
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(engine)
+    # Deploy (Render): o filesystem zera a cada restart, então o banco volta
+    # populado pelo seed. Idempotente; ligado só por variável de ambiente.
+    if os.environ.get("SEED_ON_BOOT") == "true":
+        from scripts.seed import seed_fake
+
+        with SessionLocal() as db:
+            seed_fake(db)
     # Reconstrói as estruturas do core/ a partir do banco (memória zera a cada
     # restart — inclusive no --reload; ver core/README.md).
     with SessionLocal() as db:
@@ -30,9 +38,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Rede Social da Trilha", lifespan=lifespan)
 
+# URL pública do front (Vercel): CORS_ORIGINS="https://x.vercel.app,https://y.com"
+ORIGENS = ["http://localhost:3000"] + [
+    o.strip().rstrip("/") for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=ORIGENS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
