@@ -19,3 +19,5 @@ class Capitulo(Base):
     # Jornada: capítulo anterior e a opção vencedora que levou até este (None na raiz)
     pai_id: Mapped[int | None] = mapped_column(ForeignKey("capitulos.id"), default=None)
     opcao_origem: Mapped[int | None] = mapped_column(default=None)
+    texto: Mapped[str] = mapped_column(String(4000), default="")
+    imagem_url: Mapped[str | None] = mapped_column(String(300), default=None)
