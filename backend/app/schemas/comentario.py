@@ -1,11 +1,20 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.post import AutorOut
 
+
 class ComentarioIn(BaseModel):
     texto: str = Field(min_length=1, max_length=2000)
+
+    @field_validator("texto")
+    @classmethod
+    def _sem_so_espacos(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("o comentário não pode ser vazio")
+        return v
 
 
 class ComentarioOut(BaseModel):

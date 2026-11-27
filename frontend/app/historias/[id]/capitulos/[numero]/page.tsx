@@ -73,7 +73,7 @@ export default function CapituloPage() {
       </div>
       {capitulo.texto && <p className="whitespace-pre-wrap">{capitulo.texto}</p>}
       {navegacao}
-      <Comentarios alvo="capitulos" id={capitulo.id} />
+      <Comentarios key={capitulo.id} alvo="capitulos" id={capitulo.id} />
     </div>
   );
 }

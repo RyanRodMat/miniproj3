@@ -17,6 +17,7 @@ export function Comentarios({ alvo, id }: { alvo: "posts" | "capitulos"; id: num
   const caminho = `/${alvo}/${id}/comentarios`;
 
   const [itens, setItens] = useState<Comentario[]>([]);
+  const [novos, setNovos] = useState<Comentario[]>([]);
   const [total, setTotal] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [erroLista, setErroLista] = useState<string | null>(null);
@@ -65,9 +66,9 @@ export function Comentarios({ alvo, id }: { alvo: "posts" | "capitulos"; id: num
     setErro(null);
     try {
       const novo = await apiPost<Comentario>(caminho, { texto });
-      // a lista é cronológica: o novo vai no fim. Se ainda há páginas por carregar,
-      // ele aparece quando o "carregar mais" chegar nele.
-      if (itens.length >= total) setItens((atual) => [...atual, novo]);
+      // a lista é cronológica: o novo vai no fim. Guardado à parte para aparecer já,
+      // mesmo com páginas por carregar; sai daqui quando o "carregar mais" chegar nele.
+      setNovos((atual) => [...atual, novo]);
       setTotal((t) => t + 1);
       setTexto("");
     } catch (err) {
@@ -76,6 +77,10 @@ export function Comentarios({ alvo, id }: { alvo: "posts" | "capitulos"; id: num
       setEnviando(false);
     }
   }
+
+  const pendentes = novos.filter((n) => !itens.some((i) => i.id === n.id));
+  const visiveis = [...itens, ...pendentes];
+  const faltam = total - visiveis.length;
 
   return (
     <section className="space-y-3">
@@ -104,7 +109,7 @@ export function Comentarios({ alvo, id }: { alvo: "posts" | "capitulos"; id: num
       {erroLista && <p className="text-sm text-red-700">{erroLista}</p>}
 
       <ul className="space-y-2">
-        {itens.map((c) => (
+        {visiveis.map((c) => (
           <li key={c.id} className="rounded-lg border bg-white p-3">
             <div className="flex items-baseline gap-2 text-sm">
               <Link href={`/u/${c.autor.username}`} className="font-medium hover:underline">
@@ -118,13 +123,13 @@ export function Comentarios({ alvo, id }: { alvo: "posts" | "capitulos"; id: num
         ))}
       </ul>
 
-      {!carregando && !erroLista && itens.length === 0 && (
+      {!carregando && !erroLista && visiveis.length === 0 && (
         <p className="text-sm text-zinc-500">Nenhum comentário ainda. Seja a primeira pessoa a comentar.</p>
       )}
 
       {carregando && <p className="text-sm text-zinc-500">carregando...</p>}
 
-      {!carregando && itens.length < total && (
+      {!carregando && faltam > 0 && (
         <button onClick={carregarMais} className="rounded border px-3 py-1.5 text-sm">
           carregar mais
         </button>

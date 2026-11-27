@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Text
-from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db import Base
 
 
@@ -17,10 +17,10 @@ class Comentario(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     post_id: Mapped[int | None] = mapped_column(
-        ForeignKey("posts.id"), index=True, default=None
+        ForeignKey("posts.id", ondelete="CASCADE"), index=True, default=None
     )
     capitulo_id: Mapped[int | None] = mapped_column(
-        ForeignKey("capitulos.id"), index=True, default=None
+        ForeignKey("capitulos.id", ondelete="CASCADE"), index=True, default=None
     )
     autor_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     texto: Mapped[str] = mapped_column(Text)

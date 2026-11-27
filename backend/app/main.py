@@ -10,7 +10,7 @@ from app.models.user import User
 from app.services import tags as service_tags
 from app.services.decisoes import reconstruir_jornada
 from app.routers import auth, decisoes, feed, follows, historias, likes, posts, tags, users, comentarios
-from app.schemas.comentario import ComentarioIn, ComentarioOut, ComentarioPage
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

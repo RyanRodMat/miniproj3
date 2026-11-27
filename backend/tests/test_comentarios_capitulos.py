@@ -58,3 +58,36 @@ def test_capitulo_inexistente_e_sem_login(client, logar):
     assert client.post("/capitulos/99999/comentarios", json={"texto": "oi"}, headers=bia).status_code == 404
     assert client.get("/capitulos/99999/comentarios", headers=bia).status_code == 404
     assert client.get("/capitulos/1/comentarios").status_code == 401
+
+def test_paginacao_e_limites(client, logar):
+    ana = logar("ana")
+    pid = client.post("/posts", json={"texto": "p"}, headers=ana).json()["id"]
+    for i in range(5):
+        client.post(f"/posts/{pid}/comentarios", json={"texto": f"c{i}"}, headers=ana)
+
+    r = client.get(f"/posts/{pid}/comentarios?offset=2&limit=2", headers=ana).json()
+    assert [c["texto"] for c in r["items"]] == ["c2", "c3"]
+    assert (r["total"], r["offset"], r["limit"]) == (5, 2, 2)
+    assert client.get(f"/posts/{pid}/comentarios?limit=101", headers=ana).status_code == 422
+
+
+def test_texto_invalido_e_rejeitado(client, logar):
+    ana = logar("ana")
+    pid = client.post("/posts", json={"texto": "p"}, headers=ana).json()["id"]
+    for texto in ["", "   ", "x" * 2001]:
+        r = client.post(f"/posts/{pid}/comentarios", json={"texto": texto}, headers=ana)
+        assert r.status_code == 422
+
+
+def test_apagar_post_apaga_os_comentarios(client, logar):
+    ana = logar("ana")
+    pid = client.post("/posts", json={"texto": "p"}, headers=ana).json()["id"]
+    client.post(f"/posts/{pid}/comentarios", json={"texto": "oi"}, headers=ana)
+
+    assert client.delete(f"/posts/{pid}", headers=ana).status_code == 204
+
+    from sqlalchemy import text
+    from app.db import SessionLocal
+
+    with SessionLocal() as db:
+        assert db.scalar(text("select count(*) from comentarios")) == 0
