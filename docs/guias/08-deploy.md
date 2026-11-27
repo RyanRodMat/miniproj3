@@ -83,3 +83,14 @@ entrega em portfólio:
 - [ ] `DECISIONS.md` mantido. Mostrar as decisões de produto e uma escolha
       técnica explicada (com números, se mediram algo) é o que conta num portfólio
 - [ ] URL no ar (o free tier hiberna, mas volta sozinho)
+
+## Neste repo (Marte)
+
+- `SEED_ON_BOOT=true` está implementado no lifespan do `main.py` (idempotente).
+- Em vez de editar o `allow_origins`, defina `CORS_ORIGINS` no Render com a URL
+  da Vercel (várias separadas por vírgula). `localhost:3000` continua liberado.
+- As imagens do seed são arquivos versionados em `frontend/public/seed/` e saem
+  da própria Vercel, não do `uploads/` do backend.
+- `render.yaml` na raiz descreve o serviço (Blueprint). Os passos que dependem
+  das contas do time (criar o serviço no Render, o projeto na Vercel e colar
+  as duas URLs) ficam com o dono da issue #16.
