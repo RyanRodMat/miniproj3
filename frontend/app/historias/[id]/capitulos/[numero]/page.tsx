@@ -1,5 +1,6 @@
 "use client";
 
+import { Comentarios } from "@/components/Comentarios";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -72,6 +73,7 @@ export default function CapituloPage() {
       </div>
       {capitulo.texto && <p className="whitespace-pre-wrap">{capitulo.texto}</p>}
       {navegacao}
+      <Comentarios alvo="capitulos" id={capitulo.id} />
     </div>
   );
 }

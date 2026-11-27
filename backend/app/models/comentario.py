@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column
-
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db import Base
 
 
@@ -27,3 +27,4 @@ class Comentario(Base):
     criado_em: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+    autor = relationship("User", lazy="joined")

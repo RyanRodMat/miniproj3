@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.post import AutorOut
 
 class ComentarioIn(BaseModel):
     texto: str = Field(min_length=1, max_length=2000)
@@ -14,6 +15,7 @@ class ComentarioOut(BaseModel):
     post_id: int | None
     capitulo_id: int | None
     autor_id: int
+    autor: AutorOut
     texto: str
     criado_em: datetime
 
