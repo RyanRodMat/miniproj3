@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { EVENTO_SEGUINDO } from "@/components/SidebarSeguindo";
 import { apiDelete, apiPost } from "@/lib/api";
 
 type Props = {
@@ -24,6 +25,7 @@ export function BotaoSeguir({ username, seguindoInicial, onMudou }: Props) {
       if (segue) await apiDelete(`/usuarios/${username}/follow`);
       else await apiPost(`/usuarios/${username}/follow`);
       setSegue(!segue);
+      window.dispatchEvent(new Event(EVENTO_SEGUINDO));
       onMudou?.(!segue);
     } catch (e) {
       setErro(e instanceof Error ? e.message : "erro");
