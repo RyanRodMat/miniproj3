@@ -55,6 +55,7 @@ tirem linhas quando mudarem de ideia.
 | Perfil (núcleo) | Matheus | O artista precisa de uma vitrine própria; o perfil é onde o leitor conhece quem desenha (com selo de artista). |
 | Follow (núcleo) | Matheus | Seguir um artista é como o leitor acompanha as histórias dele; também alimenta o feed dos seguidos. |
 | Curtidas (núcleo) | Laura | Curtir um post mostra o conteúdo - posts e artistas - que os usuários gostam de ver, ajudando a balancear o feed. |
+| Histórias em capítulos | Laura | É o formato central da rede: o artista publica a história em capítulos (páginas em sequência), não em posts soltos; cada capítulo novo vira um post no feed. |
 | Comentários (núcleo) | | |
 | Seed fake (núcleo) | Claude (IA) + revisão do time | A demo nunca começa vazia e o nicho (quadrinistas e ilustradores iniciantes) já aparece no conteúdo. |
 | Escolha sua jornada | Matheus | É o diferencial da rede: o leitor vota na decisão do personagem e muda o rumo da história. |
@@ -98,7 +99,7 @@ corrida; o resto foi escrito pelo time."
 
 Ryan: Claude para implementar a lógica de login, e criar conta, bem como diferenciar artista e leitor.
 Matheus: Claude para implementar Posts, Seguir e Perfil (backend, testes e telas); revisão e decisões do time.
-Laura: Claude para ajudar a implementar Curtidas e Feed e para corrigir revisões de código; Claude para implementar a seed fake.
+Laura: Claude para ajudar a implementar Curtidas e Feed e para corrigir revisões de código; Claude para implementar a seed fake e as Histórias em capítulos (backend, testes e telas).
 
 Matheus: Claude para implementar a feature Escolha sua jornada (decisões, votos, árvore em `core/jornada.py`, telas e testes).
 

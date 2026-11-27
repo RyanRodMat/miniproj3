@@ -9,3 +9,4 @@ from app.models.historia import Historia  # noqa: F401
 from app.models.capitulo import Capitulo  # noqa: F401
 from app.models.decisao import Decisao  # noqa: F401
 from app.models.voto import Voto  # noqa: F401
+from app.models.pagina import Pagina  # noqa: F401

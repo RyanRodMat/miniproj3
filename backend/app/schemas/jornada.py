@@ -1,6 +1,11 @@
 from datetime import datetime, timezone
+from typing import Annotated
 
 from pydantic import BaseModel, Field, field_validator
+
+from app.schemas.post import URL_PATTERN
+
+UrlStr = Annotated[str, Field(max_length=300, pattern=URL_PATTERN)]
 
 
 class DecisaoCreate(BaseModel):
@@ -47,21 +52,14 @@ class DecisaoOut(BaseModel):
     prazo: datetime
 
 
-class HistoriaCreate(BaseModel):
-    titulo: str = Field(min_length=1, max_length=200)
-
-
-class HistoriaOut(BaseModel):
-    id: int
-    titulo: str
-    autor_id: int
-
-
 class CapituloCreate(BaseModel):
     titulo: str = Field(min_length=1, max_length=200)
     # None só no primeiro capítulo; os seguintes nascem da opção vencedora do anterior
     opcao_origem: int | None = None
     pai_id: int | None = None
+    texto: str = Field(default="", max_length=4000)
+    # imagens do capítulo, em ordem (o upload é outra issue: aqui só a URL)
+    paginas: list[UrlStr] = Field(default_factory=list, max_length=100)
 
 
 class CapituloOut(BaseModel):

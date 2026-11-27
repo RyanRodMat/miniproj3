@@ -321,6 +321,7 @@ def seed_fake(db: Session) -> dict[str, int]:
             titulo=h["titulo"],
             sinopse=h["sinopse"],
             tag=h["tag"],
+            tags=h["tag"],
             created_at=agora - timedelta(days=12),
         )
         db.add(historia)

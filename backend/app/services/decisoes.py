@@ -9,6 +9,8 @@ from app.core.jornada import jornada
 from app.models.capitulo import Capitulo
 from app.models.decisao import Decisao
 from app.models.historia import Historia
+from app.models.pagina import Pagina
+from app.models.post import Post
 from app.models.user import User
 from app.models.voto import Voto
 from app.schemas.jornada import (
@@ -184,10 +186,26 @@ def criar_capitulo(
         historia_id=historia_id,
         numero=ja_tem + 1,
         titulo=dados.titulo,
+        texto=dados.texto,
+        imagem_url=dados.paginas[0] if dados.paginas else None,
         pai_id=dados.pai_id,
         opcao_origem=dados.opcao_origem,
     )
     db.add(capitulo)
+    db.flush()
+    db.add_all(
+        Pagina(capitulo_id=capitulo.id, ordem=i, imagem_url=url)
+        for i, url in enumerate(dados.paginas, start=1)
+    )
+    # capítulo novo vira post no feed de quem segue o artista
+    db.add(
+        Post(
+            autor_id=user.id,
+            texto=f"Novo capítulo de {historia.titulo}: {capitulo.titulo}",
+            imagem_url=capitulo.imagem_url,
+            historia_id=historia.id,
+        )
+    )
     db.commit()
     jornada.adicionar_capitulo(capitulo.id, historia_id, dados.pai_id, dados.opcao_origem)
     return capitulo
