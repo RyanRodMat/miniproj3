@@ -31,3 +31,6 @@ instrutor/
 TODO.md
 docs/design.md
 docs/review-painel-v2.md
+
+# uploads de usuários (servidos em /uploads; imagens da demo ficam em frontend/public/seed/)
+backend/uploads/
