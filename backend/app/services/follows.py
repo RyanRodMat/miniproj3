@@ -64,6 +64,18 @@ def usernames_seguidos(db: Session, user: User) -> list[str]:
     )
 
 
+def usuarios_seguidos(db: Session, user: User) -> list[User]:
+    """Perfis de quem o usuário segue, do mais recente para o mais antigo."""
+    return list(
+        db.scalars(
+            select(User)
+            .join(Follow, Follow.followed_id == User.id)
+            .where(Follow.follower_id == user.id)
+            .order_by(Follow.created_at.desc())
+        )
+    )
+
+
 def seguidos_em_lote(db: Session, user: User, alvo_ids: list[int]) -> set[int]:
     """Quais de `alvo_ids` o usuário segue, numa query só."""
     return set(
