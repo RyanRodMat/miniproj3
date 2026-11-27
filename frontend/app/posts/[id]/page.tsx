@@ -1,5 +1,6 @@
 "use client";
 
+import { Comentarios } from "@/components/Comentarios";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -91,6 +92,7 @@ export default function PostPage() {
           </button>
         </div>
       )}
+      {post && <Comentarios key={post.id} alvo="posts" id={post.id} />}
     </div>
   );
 }

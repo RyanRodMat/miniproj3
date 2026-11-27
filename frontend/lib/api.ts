@@ -166,3 +166,15 @@ export type Jornada = {
     } | null;
   }[];
 };
+
+// ---- Comentários (espelham backend/app/schemas/comentario.py) ----
+
+export type Comentario = {
+  id: number;
+  post_id: number | null;
+  capitulo_id: number | null;
+  autor_id: number;
+  autor: Autor;
+  texto: string;
+  criado_em: string;
+};

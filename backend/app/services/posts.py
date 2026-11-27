@@ -3,6 +3,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.core.tags import indice_tags
+from app.models.comentario import Comentario
 from app.models.follow import Follow
 from app.models.like import Like
 from app.models.post import Post
@@ -51,6 +52,7 @@ def atualizar(db: Session, post: Post, dados: PostUpdate) -> Post:
 
 def apagar(db: Session, post: Post) -> None:
     db.execute(delete(Like).where(Like.liked_post_id == post.id))
+    db.execute(delete(Comentario).where(Comentario.post_id == post.id))
     db.delete(post)
     db.commit()
     indice_tags.remover(post.id)

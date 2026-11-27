@@ -57,7 +57,7 @@ tirem linhas quando mudarem de ideia.
 | Curtidas (núcleo) | Laura | Curtir um post mostra o conteúdo - posts e artistas - que os usuários gostam de ver, ajudando a balancear o feed. |
 | Histórias em capítulos | Laura | É o formato central da rede: o artista publica a história em capítulos (páginas em sequência), não em posts soltos; cada capítulo novo vira um post no feed. |
 | Tags de interesse e Explorar | Laura | O leitor encontra artistas novos pelo gênero que gosta sem depender de já seguir alguém: `#tags` nos posts alimentam um índice invertido (`core/tags.py`, tag → posts, O(1) para consultar e O(t) para indexar), o onboarding grava as tags favoritas e o Explorar mostra primeiro o que bate com elas. |
-| Comentários (núcleo) | | |
+| Comentários (núcleo) | Ryan | O comentário é onde acontece a interação social da rede, sem eles não há engajamento e comunidade. |
 | Seed fake (núcleo) | Claude (IA) + revisão do time | A demo nunca começa vazia e o nicho (quadrinistas e ilustradores iniciantes) já aparece no conteúdo. |
 | Escolha sua jornada | Matheus | É o diferencial da rede: o leitor vota na decisão do personagem e muda o rumo da história. |
 
