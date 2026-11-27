@@ -62,7 +62,7 @@ tirem linhas quando mudarem de ideia.
 | Em alta | Ryan | Dá visibilidade a quem engaja agora, não a quem já é famoso: artista iniciante e veterano competem igual. |
 | Fóruns | Matheus | Espaço para discutir técnica e histórias fora de um post específico; posts do fórum ficam em tabela própria e não entram no feed pessoal. |
 | Escolha sua jornada | Matheus | É o diferencial da rede: o leitor vota na decisão do personagem e muda o rumo da história. |
-
+| Upload de Imagens | Ryan | Os artistas precisam dar upload nas suas artes e trabalhos para visualização |
 ## Uma escolha técnica
 
 Contem uma escolha técnica que o time fez e por quê. Por exemplo, por que usou

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -41,6 +41,17 @@ def criar_post(
     db: Session = Depends(get_db),
 ):
     return service.criar(db, user, dados)
+
+
+@router.post("/{post_id}/imagem")
+async def upload_imagem_post(
+    post_id: int,
+    arquivo: UploadFile = File(...),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    url = await service.anexar_imagem(db, user, post_id, arquivo)
+    return {"imagem_url": url}
 
 
 @router.get("", response_model=PostPage)
