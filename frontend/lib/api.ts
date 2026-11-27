@@ -235,3 +235,23 @@ export type Comentario = {
   texto: string;
   criado_em: string;
 };
+
+// ---- Fóruns (espelham backend/app/schemas/forum.py) ----
+
+export type Forum = {
+  id: number;
+  nome: string;
+  descricao: string;
+  criador_id: number;
+  created_at: string;
+  membros: number;
+  sou_membro: boolean;
+};
+
+export type ForumPost = {
+  id: number;
+  forum_id: number;
+  texto: string;
+  autor: Autor;
+  created_at: string;
+};

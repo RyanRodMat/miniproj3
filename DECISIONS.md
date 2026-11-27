@@ -60,6 +60,7 @@ tirem linhas quando mudarem de ideia.
 | Comentários (núcleo) | Ryan | O comentário é onde acontece a interação social da rede, sem eles não há engajamento e comunidade. |
 | Seed fake (núcleo) | Claude (IA) + revisão do time | A demo nunca começa vazia e o nicho (quadrinistas e ilustradores iniciantes) já aparece no conteúdo. |
 | Em alta | Ryan | Dá visibilidade a quem engaja agora, não a quem já é famoso: artista iniciante e veterano competem igual. |
+| Fóruns | Matheus | Espaço para discutir técnica e histórias fora de um post específico; posts do fórum ficam em tabela própria e não entram no feed pessoal. |
 | Escolha sua jornada | Matheus | É o diferencial da rede: o leitor vota na decisão do personagem e muda o rumo da história. |
 | Upload de Imagens | Ryan | Os artistas precisam dar upload nas suas artes e trabalhos para visualização |
 ## Uma escolha técnica

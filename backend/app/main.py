@@ -8,7 +8,7 @@ from sqlalchemy import select
 from app.core.contadores import contador_iniciais
 from app.db import Base, SessionLocal, engine
 from app.models.user import User
-from app.routers import auth, comentarios, decisoes, em_alta, feed, follows, historias, likes, posts, tags, users
+from app.routers import auth, comentarios, decisoes, em_alta, feed, follows, foruns, historias, likes, posts, tags, users
 from app.services import em_alta as service_em_alta
 from app.services import tags as service_tags
 from app.services.decisoes import reconstruir_jornada
@@ -57,3 +57,4 @@ app.include_router(decisoes.router)
 app.include_router(tags.router)
 app.include_router(comentarios.router)
 app.include_router(em_alta.router)
+app.include_router(foruns.router)
