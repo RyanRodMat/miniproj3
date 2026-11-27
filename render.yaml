@@ -1,0 +1,16 @@
+# Blueprint do Render (opcional): New → Blueprint, apontando para este repo.
+# O front vai na Vercel (Root Directory: frontend, NEXT_PUBLIC_API_URL = URL do backend).
+services:
+  - type: web
+    name: marte-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install uv && uv sync --frozen
+    startCommand: uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SEED_ON_BOOT # o filesystem do Render zera a cada restart
+        value: "true"
+      - key: CORS_ORIGINS # URL da Vercel, ex.: https://marte.vercel.app
+        sync: false
+      # NÃO crie DEBUG aqui.
