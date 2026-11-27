@@ -10,36 +10,76 @@ as decisões mudarem.
 
 ## Produto
 
-Respondam antes de escolher features. O pitch sai daqui.
+**Marte** é uma rede social de quadrinhos e ilustração independente.
 
-- **Público:** artistas pequenos que querem criar uma base de seguidores para suas artes / histórias.
-- **Problema:** ao postar em redes sociais gerais, arte se perde entre algoritmos que priorizam quantidade à qualidade.
-- **Como a rede resolve:** a rede reúne amantes de arte à artistas independentes e um feed em torno de seguidores, 
-  garantindo qualidade.
-- **Como saberíamos que funcionou:** vendo a criação de novas comunidades e fanbases em torno das histórias.
+- **Público:** quadrinistas e ilustradores iniciantes (quem desenha e ainda não
+  tem público) e os leitores que acompanham webcomics e gostam de dar feedback.
+- **Problema:** hoje o artista iniciante posta em redes feitas para fotos e
+  vídeos curtos, onde a arte some no meio do feed, o leitor não tem como
+  influenciar a história e quem tem poucos seguidores nunca aparece.
+- **Como a rede resolve:** o artista publica arte, tirinhas e capítulos num feed
+  de texto e imagem; o leitor decide o rumo da história por votação; e o Em alta
+  premia quem engaja agora, não quem já é famoso.
+- **Como saberíamos que funcionou:** o leitor volta no dia seguinte para ver o
+  resultado da votação e o capítulo novo; e um artista com poucos seguidores
+  aparece no Em alta por causa de um post.
 
 ## Decisões de produto
 
-Registrem de 3 a 5 escolhas que mudaram o que a rede é. Boas candidatas: por
-que essas features e não outras, o que ficou de fora, como o seed e a interface
-refletem o nicho. Uma delas vai para o vídeo.
+### 1. Escolha sua jornada em vez de só "publicar capítulo"
 
-### 1. _Marte_
+- **Contexto:** webcomic comum é leitura passiva; o diferencial que a rede
+  podia ter era o leitor mexer na história.
+- **Opções:** só comentários nos capítulos, enquetes soltas, ou votação
+  amarrada ao capítulo seguinte.
+- **Escolha:** cada capítulo termina numa decisão do personagem (2 a 4 opções,
+  com prazo). O capítulo seguinte só nasce da opção vencedora, e o mapa da
+  história mostra o caminho tomado e "o que poderia ter sido".
+- **O que cortamos e por quê:** votação aberta a qualquer momento e capítulos
+  paralelos para todas as opções. Um caminho só mantém a história coerente e o
+  trabalho do artista viável (ele desenha um capítulo por rodada).
 
-- **Contexto:** _(o que estava em jogo)_
-- **Opções:** _(o que vocês consideraram)_
-- **Escolha:** _(o que fizeram)_
-- **O que cortamos e por quê:** _(o custo da escolha)_
+### 2. Feed misto de texto e arte
 
-Exemplo:
+- **Contexto:** artista também conversa (bastidores, pedido de feedback), e a
+  arte sozinha não cria vínculo.
+- **Opções:** feed só de imagens ou feed misto, como no Twitter.
+- **Escolha:** o post é texto, com `imagem_url` opcional. O feed mistura quem o
+  usuário segue e quem os seguidos seguem, mais novo primeiro.
+- **O que cortamos e por quê:** galeria só de imagens e filtro "só arte".
+  Separar os dois afastaria justamente a conversa que faz o leitor voltar.
 
-> **Feed cronológico em vez de "Em alta"**
->
-> - **Contexto:** a comunidade é de corredores que treinam juntos.
-> - **Opções:** feed ranqueado por engajamento ou feed cronológico.
-> - **Escolha:** cronológico, com stories do dia.
-> - **O que cortamos e por quê:** o "Em alta". Quem abre o app quer ver o
->   treino de hoje dos amigos, não o post mais curtido da semana.
+### 3. Em alta por engajamento recente
+
+- **Contexto:** num feed cronológico, o iniciante só é visto por quem já o segue.
+- **Opções:** ranking por total de curtidas (premia o famoso) ou por engajamento
+  com queda no tempo.
+- **Escolha:** `(curtidas + 2·comentários + 3·votos) / (horas + 2)^1.5`.
+  Comentário e voto pesam mais por premiarem participação, e o post velho
+  perde posição rápido. Detalhes e Big O em "Uma escolha técnica".
+- **O que cortamos e por quê:** peso por número de seguidores do autor e
+  recomendação personalizada. Os dois reintroduziriam a vantagem de quem já é
+  famoso; as tags de interesse já personalizam o Explorar.
+
+### 4. Perfil de artista e de leitor
+
+- **Contexto:** quem desenha e quem lê têm papéis diferentes na rede.
+- **Opções:** um tipo único de conta ou escolher no cadastro.
+- **Escolha:** `tipo` na conta (artista ou leitor). Só artista cria história,
+  publica capítulo e abre votação; os dois postam, comentam, curtem e votam. O
+  artista ganha selo no perfil e nos posts.
+- **O que cortamos e por quê:** trocar de tipo depois do cadastro e um terceiro
+  papel (editor). Mantém a regra de permissão simples de testar.
+
+## O que ficou de fora e por quê
+
+- **Comissões terceirizadas** (pedir arte paga): é outro produto, um
+  marketplace, com pagamento, prazo e disputa.
+- **Eventos** (feiras, encontros): é outro produto, uma agenda.
+- **Upload de imagem hospedado no deploy:** o filesystem do Render zera a cada
+  restart; por isso o seed usa arquivos versionados em `frontend/public/seed/`.
+- **Fóruns** entraram, mas só depois do núcleo e da jornada, e ficam fora do
+  feed pessoal para não misturar conversa de grupo com a vitrine do artista.
 
 ## Features
 
@@ -59,9 +99,11 @@ tirem linhas quando mudarem de ideia.
 | Tags de interesse e Explorar | Laura | O leitor encontra artistas novos pelo gênero que gosta sem depender de já seguir alguém: `#tags` nos posts alimentam um índice invertido (`core/tags.py`, tag → posts, O(1) para consultar e O(t) para indexar), o onboarding grava as tags favoritas e o Explorar mostra primeiro o que bate com elas. |
 | Comentários (núcleo) | Ryan | O comentário é onde acontece a interação social da rede, sem eles não há engajamento e comunidade. |
 | Seed fake (núcleo) | Claude (IA) + revisão do time | A demo nunca começa vazia e o nicho (quadrinistas e ilustradores iniciantes) já aparece no conteúdo. |
+| Upload de arte | Ryan | Uma rede de artes sem imagem não existe; o upload transforma o post em obra. |
 | Em alta | Ryan | Dá visibilidade a quem engaja agora, não a quem já é famoso: artista iniciante e veterano competem igual. |
 | Fóruns | Matheus | Espaço para discutir técnica e histórias fora de um post específico; posts do fórum ficam em tabela própria e não entram no feed pessoal. |
 | Escolha sua jornada | Matheus | É o diferencial da rede: o leitor vota na decisão do personagem e muda o rumo da história. |
+| Deploy público | Matheus | A banca abre a URL e faz o fluxo completo; `SEED_ON_BOOT` e `CORS_ORIGINS` deixam o deploy reproduzível. |
 
 ## Uma escolha técnica
 
