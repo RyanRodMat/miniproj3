@@ -104,6 +104,7 @@ tirem linhas quando mudarem de ideia.
 | Fóruns | Matheus | Espaço para discutir técnica e histórias fora de um post específico; posts do fórum ficam em tabela própria e não entram no feed pessoal. |
 | Escolha sua jornada | Matheus | É o diferencial da rede: o leitor vota na decisão do personagem e muda o rumo da história. |
 | Deploy público | Matheus | A banca abre a URL e faz o fluxo completo; `SEED_ON_BOOT` e `CORS_ORIGINS` deixam o deploy reproduzível. |
+| Upload de Imagens | Ryan | Os artistas precisam dar upload nas suas artes e trabalhos para visualização |
 
 ## Uma escolha técnica
 

@@ -12,6 +12,7 @@ from app.models.user import User
 from app.schemas.post import PostCreate, PostUpdate
 from app.services import em_alta as service_em_alta
 from app.services import tags as service_tags
+from app.services.uploads import apagar_imagem, salvar_imagem
 
 
 def criar(db: Session, autor: User, dados: PostCreate) -> Post:
@@ -58,6 +59,7 @@ def apagar(db: Session, post: Post) -> None:
     db.execute(delete(Comentario).where(Comentario.post_id == post.id))
     db.delete(post)
     db.commit()
+    apagar_imagem(post.imagem_url)
     indice_tags.remover(post.id)
     em_alta.remover(post.id)
 
@@ -113,3 +115,16 @@ def listar_feed(db: Session, user: User, offset: int, limit: int) -> tuple[list[
         )
     )
     return posts, total
+
+
+async def anexar_imagem(db, user, post_id, arquivo) -> str:
+    post = db.get(Post, post_id)
+    if post is None:
+        raise HTTPException(404, "Post não encontrado")
+    if post.autor_id != user.id:
+        raise HTTPException(403, "Só o autor pode enviar a imagem")
+    antiga = post.imagem_url
+    post.imagem_url = await salvar_imagem(arquivo)
+    db.commit()
+    apagar_imagem(antiga)
+    return post.imagem_url

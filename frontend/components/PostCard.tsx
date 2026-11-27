@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BotaoCurtir } from "@/components/BotaoCurtir";
 import { BotaoSeguir } from "@/components/BotaoSeguir";
 import { TextoComTags } from "@/components/TextoComTags";
-import type { Post } from "@/lib/api";
+import { apiUrl, type Post } from "@/lib/api";
 
 /**
  * Renderiza texto puro OU texto + arte, conforme `imagem_url`.
@@ -32,7 +32,11 @@ export function PostCard({ post, euId }: { post: Post; euId?: number }) {
       </p>
       {post.imagem_url && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={post.imagem_url} alt="" className="max-h-[32rem] w-full rounded object-contain" />
+        <img
+          src={apiUrl(post.imagem_url)}
+          alt={`Imagem publicada por ${post.autor.name}`}
+          className="max-h-[32rem] w-full rounded object-contain"
+        />
       )}
       {post.historia_id !== null && (
         <Link href={`/historias/${post.historia_id}`} className="block text-sm text-amber-800 hover:underline">
