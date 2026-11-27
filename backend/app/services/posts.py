@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
-
+from app.services.uploads import salvar_imagem
 from app.core.tags import indice_tags
 from app.models.comentario import Comentario
 from app.models.follow import Follow
@@ -109,3 +109,14 @@ def listar_feed(db: Session, user: User, offset: int, limit: int) -> tuple[list[
         )
     )
     return posts, total
+
+# services/posts.py (onde está o criar)
+async def anexar_imagem(db, user, post_id, arquivo) -> str:
+    post = db.get(Post, post_id)
+    if post is None:
+        raise HTTPException(404, "Post não encontrado")
+    if post.autor_id != user.id:
+        raise HTTPException(403, "Só o autor pode enviar a imagem")
+    post.imagem_url = await salvar_imagem(arquivo)
+    db.commit()
+    return post.imagem_url
