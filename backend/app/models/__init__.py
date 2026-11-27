@@ -11,3 +11,4 @@ from app.models.decisao import Decisao  # noqa: F401
 from app.models.voto import Voto  # noqa: F401
 from app.models.pagina import Pagina  # noqa: F401
 from app.models.comentario import Comentario  # noqa: F401
+from app.models.forum import Forum, ForumMembro, ForumPost  # noqa: F401

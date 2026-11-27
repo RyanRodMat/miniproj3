@@ -10,7 +10,7 @@ from app.models.user import User
 from app.services import em_alta as service_em_alta
 from app.services import tags as service_tags
 from app.services.decisoes import reconstruir_jornada
-from app.routers import auth, decisoes, feed, follows, historias, likes, posts, tags, users, comentarios, em_alta
+from app.routers import auth, decisoes, feed, follows, historias, likes, posts, tags, users, comentarios, em_alta, foruns
 
 
 @asynccontextmanager
@@ -50,3 +50,4 @@ app.include_router(decisoes.router)
 app.include_router(tags.router)
 app.include_router(comentarios.router)
 app.include_router(em_alta.router)
+app.include_router(foruns.router)
