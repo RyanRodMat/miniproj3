@@ -58,6 +58,12 @@ def meus_seguidos(user: User = Depends(get_current_user), db: Session = Depends(
     return {"usernames": service_follows.usernames_seguidos(db, user)}
 
 
+@router.get("/eu/seguindo/perfis", response_model=list[UserOut])
+def meus_seguidos_perfis(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Quem o usuário logado segue, com nome e avatar (a barra lateral usa)."""
+    return service_follows.usuarios_seguidos(db, user)
+
+
 # Declarada depois de /stats: "/{username}" casaria com "stats" se viesse antes.
 @router.get("/{username}", response_model=PerfilOut)
 def ver_perfil(

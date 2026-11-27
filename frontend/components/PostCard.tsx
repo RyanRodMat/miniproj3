@@ -2,14 +2,16 @@ import Link from "next/link";
 
 import { BotaoCurtir } from "@/components/BotaoCurtir";
 import { BotaoSeguir } from "@/components/BotaoSeguir";
+import { ComentariosDoPost } from "@/components/ComentariosDoPost";
 import { TextoComTags } from "@/components/TextoComTags";
 import { apiUrl, type Post } from "@/lib/api";
 
 /**
  * Renderiza texto puro OU texto + arte, conforme `imagem_url`.
  * Com `euId`, mostra o botão de seguir o autor (some nos posts do próprio usuário).
+ * `comentarios={false}` esconde o botão de comentários (a página do post já lista os dela).
  */
-export function PostCard({ post, euId }: { post: Post; euId?: number }) {
+export function PostCard({ post, euId, comentarios = true }: { post: Post; euId?: number; comentarios?: boolean }) {
   return (
     <article className="space-y-3 rounded-lg border bg-white p-4">
       <header className="flex items-center gap-2 text-sm">
@@ -43,7 +45,13 @@ export function PostCard({ post, euId }: { post: Post; euId?: number }) {
           ler a história →
         </Link>
       )}
-      <BotaoCurtir postId={post.id} curtidasInicial={post.curtidas} curtiuInicial={post.eu_curti} />
+      {comentarios ? (
+        <ComentariosDoPost postId={post.id}>
+          <BotaoCurtir postId={post.id} curtidasInicial={post.curtidas} curtiuInicial={post.eu_curti} />
+        </ComentariosDoPost>
+      ) : (
+        <BotaoCurtir postId={post.id} curtidasInicial={post.curtidas} curtiuInicial={post.eu_curti} />
+      )}
     </article>
   );
 }
