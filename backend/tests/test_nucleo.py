@@ -197,7 +197,6 @@ def test_apagar_post_apaga_as_curtidas(client, logar):
 # ---------- COMENTÁRIOS ----------
 
 
-@pytest.mark.skip(reason="Remova ao implementar comentários planos em ordem cronológica (núcleo)")
 def test_comentarios_planos_cronologicos(client, logar):
     ana = logar("ana")
     bia = logar("bia")

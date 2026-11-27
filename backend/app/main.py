@@ -9,8 +9,8 @@ from app.db import Base, SessionLocal, engine
 from app.models.user import User
 from app.services import tags as service_tags
 from app.services.decisoes import reconstruir_jornada
-from app.routers import auth, decisoes, feed, follows, historias, likes, posts, tags, users
-
+from app.routers import auth, decisoes, feed, follows, historias, likes, posts, tags, users, comentarios
+from app.schemas.comentario import ComentarioIn, ComentarioOut, ComentarioPage
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -46,3 +46,4 @@ app.include_router(feed.router)
 app.include_router(historias.router)
 app.include_router(decisoes.router)
 app.include_router(tags.router)
+app.include_router(comentarios.router)
