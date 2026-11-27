@@ -35,6 +35,7 @@ class PostOut(BaseModel):
     texto: str
     imagem_url: str | None
     autor: AutorOut
+    historia_id: int | None = None
     created_at: datetime
     curtidas: int = 0
     eu_curti: bool = False

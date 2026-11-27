@@ -31,6 +31,11 @@ export function PostCard({ post, euId }: { post: Post; euId?: number }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={post.imagem_url} alt="" className="max-h-[32rem] w-full rounded object-contain" />
       )}
+      {post.historia_id !== null && (
+        <Link href={`/historias/${post.historia_id}`} className="block text-sm text-amber-800 hover:underline">
+          ler a história →
+        </Link>
+      )}
       <BotaoCurtir postId={post.id} curtidasInicial={post.curtidas} curtiuInicial={post.eu_curti} />
     </article>
   );

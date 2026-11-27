@@ -95,6 +95,7 @@ export type Post = {
   texto: string;
   imagem_url: string | null;
   autor: Autor;
+  historia_id: number | null;
   created_at: string;
   curtidas: number;
   eu_curti: boolean;
@@ -108,4 +109,25 @@ export type Perfil = User & {
   seguidores: number;
   seguindo: number;
   eu_sigo: boolean;
+};
+
+// ---- Histórias (espelham backend/app/schemas/historia.py) ----
+
+export type CapituloResumo = { id: number; numero: number; titulo: string };
+
+export type Capitulo = CapituloResumo & {
+  historia_id: number;
+  texto: string;
+  paginas: string[];
+};
+
+export type Historia = {
+  id: number;
+  titulo: string;
+  sinopse: string;
+  capa_url: string | null;
+  tags: string[];
+  autor: Autor;
+  created_at: string;
+  capitulos: CapituloResumo[];
 };
