@@ -24,12 +24,40 @@ Registrem de 3 a 5 escolhas que mudaram o que a rede é. Boas candidatas: por
 que essas features e não outras, o que ficou de fora, como o seed e a interface
 refletem o nicho. Uma delas vai para o vídeo.
 
-### 1. _Marte_
+### 1. Histórias em capítulos em vez de posts soltos
 
-- **Contexto:** _(o que estava em jogo)_
-- **Opções:** _(o que vocês consideraram)_
-- **Escolha:** _(o que fizeram)_
-- **O que cortamos e por quê:** _(o custo da escolha)_
+- **Contexto:** a rede é para artistas pequenos que querem formar uma base de leitores em torno de uma obra, e não só juntar curtidas em imagens avulsas.
+- **Opções:** só posts (texto + imagem) como nas redes gerais, ou um formato próprio de história com capítulos e páginas em sequência.
+- **Escolha:** a história é o formato central. O artista publica capítulos (páginas em ordem) e cada capítulo novo vira um post no feed, com comentários por capítulo.
+- **O que cortamos e por quê:** ficou de fora um "álbum" ou galeria solta de ilustrações como entidade própria. Posts com imagem já cobrem esse caso, e o leitor volta por uma história para acompanhar, não por uma imagem isolada.
+
+### 2. Feed por quem o usuário segue, com o "Em alta" separado
+
+- **Contexto:** o problema que a rede resolve é a arte se perder em algoritmos que priorizam quantidade sobre qualidade.
+- **Opções:** um único feed ranqueado por engajamento, ou feed cronológico por quem o usuário segue com o ranking numa aba à parte.
+- **Escolha:** o feed principal é cronológico, mais novo primeiro, com posts de quem o usuário segue e de quem os seguidos seguem, intercalados com conteúdo novo. O "Em alta" existe como aba separada (`core/em_alta.py`), medindo o engajamento de agora e não o acumulado, para que artistas iniciantes e veteranos competam em pé de igualdade.
+- **O que cortamos e por quê:** o ranking por engajamento no feed principal. Ele favorece quem já tem público, então quem abre a home vê o que seus seguidos publicaram, e a descoberta fica numa aba explícita.
+
+### 3. Escolha sua jornada: o leitor vota no rumo da história
+
+- **Contexto:** queríamos algo que transformasse leitores em comunidade (o critério de sucesso é o surgimento de fanbases), não só espectadores.
+- **Opções:** apenas curtidas e comentários, ou deixar o leitor votar numa decisão do personagem ao fim do capítulo.
+- **Escolha:** o artista abre uma decisão com até 4 opções e prazo. A opção vencedora define o próximo capítulo, e as que perderam ficam registradas como "o que poderia ter sido". O mapa da jornada mostra o caminho tomado.
+- **O que cortamos e por quê:** votação sem prazo e árvore ramificada completa, em que todos os ramos seriam escritos. Isso exigiria o artista produzir várias versões de cada capítulo. Só o ramo vencedor é escrito, o que é viável para um artista sozinho.
+
+### 4. Explorar por tags de interesse, sem depender de já seguir alguém
+
+- **Contexto:** um leitor novo não segue ninguém e o feed por seguidos começaria vazio.
+- **Opções:** busca por texto livre, categorias fixas ou `#tags` nos posts com o leitor escolhendo seus gêneros no onboarding.
+- **Escolha:** `#tags` nos posts alimentam um índice invertido (`core/tags.py`). O onboarding grava as tags favoritas e o Explorar mostra primeiro o que bate com elas.
+- **O que cortamos e por quê:** a busca textual completa e as recomendações personalizadas por comportamento. As tags declaradas pelo próprio leitor resolvem o começo frio com bem menos complexidade.
+
+### 5. Upload de imagens validado e com limite, em vez de só URL externa
+
+- **Contexto:** o artista precisa publicar a própria arte, e colar o link de uma imagem hospedada em outro lugar é uma barreira para quem está começando.
+- **Opções:** aceitar só `imagem_url` externa, ou receber o arquivo direto na API.
+- **Escolha:** upload direto de jpg, png ou webp de até 2 MB. O servidor confere o tipo e a assinatura real do arquivo (não confia só no `Content-Type`), grava com nome aleatório e apaga o arquivo se o post for removido ou falhar.
+- **O que cortamos e por quê:** formatos como GIF e arquivos grandes, para evitar abuso de armazenamento. As imagens do seed ficam versionadas no front (`/seed/`), porque a pasta `uploads/` não sobrevive ao deploy.
 
 Exemplo:
 
@@ -128,6 +156,8 @@ corrida; o resto foi escrito pelo time."
 Ryan: Claude para implementar a lógica de login, e criar conta, bem como diferenciar artista e leitor.
 Matheus: Claude para implementar Posts, Seguir e Perfil (backend, testes e telas); revisão e decisões do time.
 Laura: Claude para ajudar a implementar Curtidas e Feed e para corrigir revisões de código; Claude para implementar a seed fake e as Histórias em capítulos (backend, testes e telas).
+
+Ryan: Claude para implementar Comentários (posts e capítulos) e o Upload de Imagens (validação, limpeza de arquivos, backend, testes e telas), além da configuração de deploy (`SEED_ON_BOOT`, `CORS_ORIGINS`).
 
 Matheus: Claude para implementar o Em alta (core/em_alta.py, aba na home, testes e bench), os Fóruns e o deploy.
 
