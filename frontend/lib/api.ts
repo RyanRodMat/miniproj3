@@ -3,6 +3,22 @@
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+export function apiUrl(path: string): string {
+  // Imagens de demonstração ficam no frontend
+  if (path.startsWith("/seed/")) {
+    return path;
+  }
+
+  // URLs completas permanecem inalteradas
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+
+  // Imagens enviadas ficam no backend
+  return `${BASE}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+
 export class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
@@ -61,6 +77,47 @@ export function apiPatch<T>(path: string, body: unknown): Promise<T> {
 export function apiDelete<T = void>(path: string): Promise<T> {
   return request<T>("DELETE", path);
 }
+
+export async function apiUpload<T>(path: string, arquivo: File): Promise<T> {
+  const fd = new FormData();
+  fd.append("arquivo", arquivo);
+
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("token")
+      : null;
+
+  const uploadHeaders: Record<string, string> = {};
+
+  if (token) {
+    uploadHeaders["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${BASE}${path}`, {
+    method: "POST",
+    headers: uploadHeaders,
+    body: fd,
+    cache: "no-store",
+  });
+
+  if (res.status === 401 && typeof window !== "undefined" && token) {
+    localStorage.removeItem("token");
+    if (window.location.pathname !== "/login") {
+      window.location.href = "/login";
+    }
+  }
+
+  if (res.status === 413) throw new ApiError(413, "A imagem passa de 2 MB.");
+  if (res.status === 415) throw new ApiError(415, "Use uma imagem jpg, png ou webp.");
+  if (res.status === 403) throw new ApiError(403, "Só o autor pode enviar a imagem.");
+
+  if (!res.ok) {
+    throw new ApiError(res.status, "Falha no upload da imagem.");
+  }
+
+  return res.json() as Promise<T>;
+}
+
 
 // ---- tipos do slice de exemplo (espelham backend/app/schemas/user.py) ----
 

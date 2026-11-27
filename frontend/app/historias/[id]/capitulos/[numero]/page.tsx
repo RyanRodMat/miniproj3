@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { ApiError, apiGet, type Capitulo, type Historia } from "@/lib/api";
+import { ApiError, apiGet, apiUrl, type Capitulo, type Historia } from "@/lib/api";
 import { useExigeLogin } from "@/lib/useExigeLogin";
 
 /** Leitor: páginas em sequência, rolagem vertical, sem espaço entre elas. */
@@ -68,7 +68,13 @@ export default function CapituloPage() {
       <div className="flex flex-col">
         {capitulo.paginas.map((url, i) => (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={url + i} src={url} alt={`página ${i + 1}`} className="w-full" loading="lazy" />
+          <img
+            key={url + i}
+            src={apiUrl(url)}
+            alt={`página ${i + 1}`}
+            className="w-full"
+            loading="lazy"
+          />
         ))}
       </div>
       {capitulo.texto && <p className="whitespace-pre-wrap">{capitulo.texto}</p>}

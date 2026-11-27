@@ -60,7 +60,7 @@ tirem linhas quando mudarem de ideia.
 | Comentários (núcleo) | Ryan | O comentário é onde acontece a interação social da rede, sem eles não há engajamento e comunidade. |
 | Seed fake (núcleo) | Claude (IA) + revisão do time | A demo nunca começa vazia e o nicho (quadrinistas e ilustradores iniciantes) já aparece no conteúdo. |
 | Escolha sua jornada | Matheus | É o diferencial da rede: o leitor vota na decisão do personagem e muda o rumo da história. |
-
+| Upload de Imagens | Ryan | Os artistas precisam dar upload nas suas artes e trabalhos para visualização |
 ## Uma escolha técnica
 
 Contem uma escolha técnica que o time fez e por quê. Por exemplo, por que usou
