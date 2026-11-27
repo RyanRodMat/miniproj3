@@ -23,6 +23,14 @@ def criar_historia(
     return service.detalhe(db, service.criar(db, user, dados))
 
 
+@router.get("", response_model=list[HistoriaOut])
+def listar_historias(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return service.listar(db)
+
+
 @router.get("/{historia_id}", response_model=HistoriaOut)
 def ver_historia(
     historia_id: int,

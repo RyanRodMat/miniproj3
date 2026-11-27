@@ -31,6 +31,9 @@ export default function Navbar() {
           <Link href="/explorar" className="text-sm text-zinc-600 hover:text-zinc-900">
             Explorar
           </Link>
+          <Link href="/historias" className="text-sm text-zinc-600 hover:text-zinc-900">
+            Jornadas
+          </Link>
           <Link href="/usuarios" className="text-sm text-zinc-600 hover:text-zinc-900">
             Usuários
           </Link>

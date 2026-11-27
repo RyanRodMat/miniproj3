@@ -41,6 +41,11 @@ def criar(db: Session, autor: User, dados: HistoriaCreate) -> Historia:
     return historia
 
 
+def listar(db: Session) -> list[HistoriaOut]:
+    historias = db.scalars(select(Historia).order_by(Historia.created_at.desc()))
+    return [detalhe(db, h) for h in historias]
+
+
 def buscar(db: Session, historia_id: int) -> Historia:
     historia = db.get(Historia, historia_id)
     if not historia:
