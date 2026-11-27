@@ -55,7 +55,7 @@ export default function PostPage() {
   return (
     <div className="space-y-4">
       {erro && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{erro}</p>}
-      {post && !editando && <PostCard post={post} euId={eu?.id} />}
+      {post && !editando && <PostCard post={post} euId={eu?.id} comentarios={false} />}
       {post && editando && (
         <form onSubmit={salvar} className="space-y-2 rounded-lg border bg-white p-3">
           <textarea

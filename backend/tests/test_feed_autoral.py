@@ -58,3 +58,12 @@ def test_post_novo_nao_herda_curtidas_de_post_apagado(client, logar):
     novo = client.post("/posts", json={"texto": "novo"}, headers=ana).json()
     assert novo["curtidas"] == 0
     assert client.get(f"/posts/{novo['id']}", headers=bia).json()["eu_curti"] is False
+
+
+def test_perfis_de_quem_sigo(client, logar):
+    ana = logar("ana")
+    bia = logar("bia")
+    client.post("/usuarios/bia/follow", headers=ana)
+    perfis = client.get("/usuarios/eu/seguindo/perfis", headers=ana).json()
+    assert [p["username"] for p in perfis] == ["bia"]
+    assert client.get("/usuarios/eu/seguindo/perfis", headers=bia).json() == []
