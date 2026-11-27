@@ -99,7 +99,7 @@ passaria para o banco.
 `score = (curtidas + 2·comentários + 3·votos) / (horas + 2)^1.5`. Comentário e
 voto pesam mais que curtida porque premiam discussão e participação, não só um
 toque. O expoente 1,5 faz o post envelhecer rápido: 24 h depois ele precisa de
-cerca de 40x o engajamento para ocupar o mesmo lugar. Votos de uma história
+cerca de 47x o engajamento para ocupar o mesmo lugar. Votos de uma história
 valem para os posts dela ("novo capítulo").
 
 Como o score depende do relógio, um heap pronto ficaria velho. O que o `core/`
