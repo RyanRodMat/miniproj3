@@ -4,80 +4,89 @@ import { useCallback, useEffect, useState } from "react";
 
 import { NovoPost } from "@/components/NovoPost";
 import { PostCard } from "@/components/PostCard";
+import { EVENTO_SEGUINDO } from "@/components/SidebarSeguindo";
 import { apiGet, type Page, type Post, type User } from "@/lib/api";
 import { useExigeLogin } from "@/lib/useExigeLogin";
 
 const POR_PAGINA = 10;
 
-type Aba = "seguindo" | "em-alta";
-const ROTA: Record<Aba, string> = { seguindo: "/feed", "em-alta": "/em-alta" };
+type Aba = "seguindo" | "para-voce" | "em-alta";
+const ABAS: { id: Aba; titulo: string; rota: string }[] = [
+  { id: "seguindo", titulo: "Seguindo", rota: "/feed" },
+  { id: "para-voce", titulo: "Para você", rota: "/explorar" },
+  { id: "em-alta", titulo: "Em alta", rota: "/em-alta" },
+];
+
+type Feed = { posts: Post[]; total: number; carregando: boolean; erro: string | null };
+const FEED_VAZIO: Feed = { posts: [], total: 0, carregando: true, erro: null };
 
 export default function Home() {
   useExigeLogin();
-  const [aba, setAba] = useState<Aba>("seguindo");
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [total, setTotal] = useState(0);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState<string | null>(null);
+  // um feed por aba, carregados juntos: trocar de aba só muda qual deles aparece
+  const [feeds, setFeeds] = useState<Record<Aba, Feed>>({ seguindo: FEED_VAZIO, "para-voce": FEED_VAZIO, "em-alta": FEED_VAZIO });
   const [euId, setEuId] = useState<number>();
   const [publicado, setPublicado] = useState(false);
+  const [aba, setAba] = useState<Aba>("seguindo");
 
-  const carregar = useCallback(
-    async (offset: number) => {
-    setCarregando(true);
+  const { posts, total, carregando, erro } = feeds[aba];
+
+  const carregar = useCallback(async (id: Aba, offset: number) => {
+    const atualizar = (f: Partial<Feed>) => setFeeds((atuais) => ({ ...atuais, [id]: { ...atuais[id], ...f } }));
+    atualizar({ carregando: true });
     try {
-      const pagina = await apiGet<Page<Post>>(`${ROTA[aba]}?offset=${offset}&limit=${POR_PAGINA}`);
-      setPosts((atuais) => (offset === 0 ? pagina.items : [...atuais, ...pagina.items]));
-      setTotal(pagina.total);
-      setErro(null);
+      const rota = ABAS.find((a) => a.id === id)!.rota;
+      const pagina = await apiGet<Page<Post>>(`${rota}?offset=${offset}&limit=${POR_PAGINA}`);
+      setFeeds((atuais) => ({
+        ...atuais,
+        [id]: {
+          posts: offset === 0 ? pagina.items : [...atuais[id].posts, ...pagina.items],
+          total: pagina.total,
+          carregando: false,
+          erro: null,
+        },
+      }));
     } catch {
-      setErro("não consegui carregar os posts — o backend está rodando?");
-    } finally {
-      setCarregando(false);
-    }
-    },
-    [aba],
-  );
-
-  useEffect(() => {
-    if (localStorage.getItem("token")) {
-      setPosts([]);
-      setTotal(0);
-      carregar(0);
-    }
-  }, [carregar]);
-
-  useEffect(() => {
-    if (localStorage.getItem("token")) {
-      apiGet<User>("/auth/eu").then((u) => setEuId(u.id)).catch(() => {});
+      atualizar({ carregando: false, erro: "não consegui carregar os posts — o backend está rodando?" });
     }
   }, []);
 
+  useEffect(() => {
+    if (!localStorage.getItem("token")) return;
+    ABAS.forEach((a) => carregar(a.id, 0));
+    apiGet<User>("/auth/eu").then((u) => setEuId(u.id)).catch(() => {});
+  }, [carregar]);
+
+  // seguir/deixar de seguir muda o que o feed "Seguindo" mostra
+  useEffect(() => {
+    const recarregar = () => carregar("seguindo", 0);
+    window.addEventListener(EVENTO_SEGUINDO, recarregar);
+    return () => window.removeEventListener(EVENTO_SEGUINDO, recarregar);
+  }, [carregar]);
+
   return (
     <div className="space-y-6">
-      <div className="flex gap-2" role="tablist">
-        {(
-          [
-            ["seguindo", "Seguindo"],
-            ["em-alta", "Em alta"],
-          ] as const
-        ).map(([id, rotulo]) => (
-          <button
-            key={id}
-            role="tab"
-            aria-selected={aba === id}
-            onClick={() => setAba(id)}
-            className={`rounded-full border px-4 py-1.5 text-sm ${
-              aba === id ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white hover:bg-zinc-100"
-            }`}
-          >
-            {rotulo}
-          </button>
-        ))}
-      </div>
+      <h1 className="text-2xl font-bold">Feed</h1>
       {/* o feed só tem quem você segue: o post novo aparece no seu perfil, não aqui */}
       <NovoPost onCriado={() => setPublicado(true)} />
       {publicado && <p className="text-sm text-green-700">Publicado! Ele aparece no seu perfil.</p>}
+
+      <div role="tablist" className="flex gap-6 border-b border-zinc-200">
+        {ABAS.map((a) => (
+          <button
+            key={a.id}
+            role="tab"
+            aria-selected={aba === a.id}
+            onClick={() => setAba(a.id)}
+            className={`-mb-px border-b-2 px-1 pb-2 text-sm font-medium ${
+              aba === a.id
+                ? "border-zinc-900 text-zinc-900"
+                : "border-transparent text-zinc-500 hover:text-zinc-900"
+            }`}
+          >
+            {a.titulo}
+          </button>
+        ))}
+      </div>
 
       {erro && <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{erro}</p>}
 
@@ -91,14 +100,16 @@ export default function Home() {
 
       {!carregando && !erro && posts.length === 0 && (
         <p className="text-zinc-500">
-          {aba === "em-alta"
+          {aba === "seguindo"
+            ? "Seu feed está vazio. Siga alguém na página de usuários para ver os posts aqui."
+            : aba === "em-alta"
             ? "Nada em alta por enquanto."
-            : "Seu feed está vazio. Siga alguém na página de usuários para ver os posts aqui."}
+            : "Nenhum post por aqui ainda."}
         </p>
       )}
       {posts.length < total && (
         <button
-          onClick={() => carregar(posts.length)}
+          onClick={() => carregar(aba, posts.length)}
           disabled={carregando}
           className="rounded border bg-white px-3 py-1.5 text-sm disabled:opacity-50"
         >
